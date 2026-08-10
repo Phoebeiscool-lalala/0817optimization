@@ -372,6 +372,36 @@ body{font-size:17px;line-height:1.72}
 .country-modal iframe{flex:1;border:none;width:100%}
 .btn-fullview{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;margin-top:12px;border-radius:10px;border:1px solid var(--accent);background:rgba(99,102,241,0.08);color:var(--accent);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s}
 .btn-fullview:hover{background:var(--accent);color:#fff}
+
+/* ========== LATEST UPDATES SCROLL MODULE ========== */
+.latest-updates-section{max-width:1200px;margin:40px auto 0;padding:0 24px 40px}
+.latest-updates-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.latest-updates-header h2{font-size:1.3rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.latest-updates-header .pulse-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+.latest-updates-header .sub{color:var(--text3);font-size:0.85rem;margin-left:4px}
+.latest-updates-scroll-wrap{position:relative;max-height:420px;overflow:hidden;border-radius:14px;border:1px solid var(--border);background:var(--card)}
+.latest-updates-scroll-wrap:hover .latest-updates-track{animation-play-state:paused}
+.latest-updates-track{display:flex;flex-direction:column;gap:0}
+.latest-updates-track.scrolling{animation:scrollUp 40s linear infinite}
+@keyframes scrollUp{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
+.update-item{display:flex;gap:16px;padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s,transform .15s;position:relative}
+.update-item:hover{background:var(--card-hover);transform:translateX(4px)}
+.update-item:last-child{border-bottom:none}
+.update-item .new-badge{position:absolute;top:12px;right:16px;background:var(--high);color:#fff;font-size:0.55rem;font-weight:700;padding:2px 8px;border-radius:8px;letter-spacing:0.5px}
+.update-item .new-badge.recent{background:var(--accent)}
+.update-left{flex-shrink:0;display:flex;flex-direction:column;align-items:center;min-width:56px}
+.update-flag{font-size:1.6rem;line-height:1}
+.update-date{font-size:0.6rem;color:var(--text3);margin-top:4px;text-align:center;line-height:1.3}
+.update-right{flex:1;min-width:0}
+.update-title{font-size:0.92rem;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.update-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.update-meta .tag{font-size:0.62rem;padding:2px 8px;border-radius:8px;background:rgba(6,182,212,0.1);color:var(--accent);border:1px solid rgba(6,182,212,0.2)}
+.update-meta .date-tag{font-size:0.62rem;color:var(--text3);display:flex;align-items:center;gap:3px}
+.update-summary{font-size:0.76rem;color:var(--text2);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.update-gradient-top,.update-gradient-bottom{position:absolute;left:0;right:0;height:40px;pointer-events:none;z-index:10}
+.update-gradient-top{top:0;background:linear-gradient(to bottom,var(--card),transparent)}
+.update-gradient-bottom{bottom:0;background:linear-gradient(to top,var(--card),transparent)}
+@media(max-width:768px){.latest-updates-section{padding:0 16px 30px}.latest-updates-header h2{font-size:1.1rem}.update-item{padding:14px 16px;gap:12px}.update-title{font-size:0.85rem}.update-summary{font-size:0.72rem}}
 </style>
 </head>
 <body>
@@ -488,6 +518,20 @@ body{font-size:17px;line-height:1.72}
 
     <h4><span class="dot"></span>📅 <span data-i18n="upcomingDates">即将生效</span></h4>
     <div id="upcomingList"></div>
+  </div>
+</div>
+
+<!-- LATEST REGULATION UPDATES -->
+<div class="latest-updates-section">
+  <div class="latest-updates-header">
+    <span class="pulse-dot"></span>
+    <h2>📰 最新法规更新</h2>
+    <span class="sub">近 1 年内最新发布或更新的法规</span>
+  </div>
+  <div class="latest-updates-scroll-wrap" id="latestScrollWrap">
+    <div class="update-gradient-top"></div>
+    <div class="latest-updates-track" id="latestTrack"></div>
+    <div class="update-gradient-bottom"></div>
   </div>
 </div>
 
@@ -1397,7 +1441,77 @@ function closeCountryPage() {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCountryPage(); });
 
+// ============ LATEST REGULATION UPDATES MODULE ============
+function renderLatestUpdates() {
+  const track = document.getElementById('latestTrack');
+  if (!track) return;
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  // Filter data from last 1 year, sort by effectiveDate descending
+  const recentData = laborLawData
+    .filter(item => new Date(item.effectiveDate) >= oneYearAgo)
+    .sort((a, b) => new Date(b.effectiveDate) - new Date(a.effectiveDate));
+
+  if (recentData.length === 0) {
+    track.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3);font-size:0.85rem">暂无近 1 年内的法规更新</div>';
+    return;
+  }
+
+  const isEn = currentLang === 'en' || currentLang === 'es';
+
+  // Build items HTML (render twice for seamless loop)
+  function buildItems() {
+    return recentData.map(item => {
+      const effDate = new Date(item.effectiveDate);
+      const isNew = effDate >= thirtyDaysAgo;
+      const badgeClass = isNew ? 'recent' : '';
+      const badgeText = isNew ? 'NEW' : '';
+      return `
+        <div class="update-item" onclick="openDetail('${item.id}')">
+          ${badgeText ? `<span class="new-badge ${badgeClass}">${badgeText}</span>` : ''}
+          <div class="update-left">
+            <span class="update-flag">${item.flag}</span>
+            <span class="update-date">${item.effectiveDate}</span>
+          </div>
+          <div class="update-right">
+            <div class="update-title">${item.lawName}</div>
+            <div class="update-meta">
+              <span class="tag">${countryNameMap[item.country]||item.country}</span>
+              <span class="tag">${item.category}</span>
+              <span class="date-tag">📅 ${isEn?'Updated':'更新'} ${item.lastUpdated}</span>
+            </div>
+            <div class="update-summary">${item.chineseTranslation}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Duplicate for infinite scroll effect
+  track.innerHTML = buildItems() + buildItems();
+  track.classList.add('scrolling');
+}
+
+// Pause on hover
+document.addEventListener('DOMContentLoaded', () => {
+  const wrap = document.getElementById('latestScrollWrap');
+  if (wrap) {
+    wrap.addEventListener('mouseenter', () => {
+      const track = document.getElementById('latestTrack');
+      if (track) track.style.animationPlayState = 'paused';
+    });
+    wrap.addEventListener('mouseleave', () => {
+      const track = document.getElementById('latestTrack');
+      if (track) track.style.animationPlayState = 'running';
+    });
+  }
+});
+
 init();
+// Render latest updates after init
+setTimeout(renderLatestUpdates, 100);
 </script>
 <!-- COUNTRY FULL VIEW MODAL -->
 <div class="country-modal" id="countryModal">
