@@ -942,7 +942,7 @@ function renderTimeline() {
         <div class="tl-card ${item.importance} ${expandedCard===item.id?'exp':''}" onclick="toggleTlCard('${item.id}')">
           <div class="tl-top">
             <span class="tl-flag">${item.flag}</span>
-            <span class="tl-country">${item.country}</span>
+            <span class="tl-country">${countryNameMap[item.country]||item.country}</span>
             <span class="tl-date">${item.effectiveDate}</span>
           </div>
           <div class="tl-law">${item.lawName}</div>
@@ -985,7 +985,7 @@ function renderLawCards() {
     return `<div class="law-card ${item.importance} ${selectedLawId===item.id?'active':''}" onclick="openDetail('${item.id}')">
       <div class="lc-top">
         <span class="lc-flag">${item.flag}</span>
-        <span class="lc-country">${item.country}</span>
+        <span class="lc-country">${countryNameMap[item.country]||item.country}</span>
       </div>
       <div class="lc-title">${item.lawName}</div>
       <div class="lc-meta">
@@ -1012,7 +1012,7 @@ function openDetail(id) {
     <div class="dp-grid">
       <div class="dp-section">
         <h4>📄 ${isEn?'Basic Information':'基本信息'}</h4>
-        <div class="dp-row"><div class="dp-label">${isEn?'Country':'国家'}</div><div class="dp-val">${item.flag} ${item.country}</div></div>
+        <div class="dp-row"><div class="dp-label">${isEn?'Country':'国家'}</div><div class="dp-val">${item.flag} ${countryNameMap[item.country]||item.country}</div></div>
         <div class="dp-row"><div class="dp-label">${isEn?'Law Title':'法律名称'}</div><div class="dp-val" style="font-weight:700">${item.lawName}</div></div>
         <div class="dp-row"><div class="dp-label">${isEn?'Article':'条款'}</div><div class="dp-val">${item.article}</div></div>
         <div class="dp-row"><div class="dp-label">${isEn?'Effective':'生效日期'}</div><div class="dp-val">${item.effectiveDate}</div></div>
@@ -1049,7 +1049,7 @@ function renderRightPanel() {
   const upcoming = filteredData.filter(d => new Date(d.effectiveDate) > now).sort((a,b) => new Date(a.effectiveDate) - new Date(b.effectiveDate)).slice(0, 5);
   document.getElementById('upcomingList').innerHTML = upcoming.map(item => `
     <div class="upcoming-item">
-      <div style="display:flex;align-items:center;gap:6px"><span>${item.flag}</span><strong>${item.country}</strong> — ${item.lawName}</div>
+      <div style="display:flex;align-items:center;gap:6px"><span>${item.flag}</span><strong>${countryNameMap[item.country]||item.country}</strong> — ${item.lawName}</div>
       <div class="upcoming-date">${t('effective')}: ${item.effectiveDate}</div>
     </div>`).join('') || '<div style="font-size:0.68rem;color:var(--text3);padding:8px 0">No upcoming dates</div>';
 }
@@ -1097,7 +1097,7 @@ function openDrawer(id) {
   const ai = aiMonitorData.find(a => a.country === item.country);
   const lang = currentLang;
   document.getElementById('drawerContent').innerHTML = `
-    <h2>${item.flag} ${item.country} — ${item.lawName}</h2>
+    <h2>${item.flag} ${countryNameMap[item.country]||item.country} — ${item.lawName}</h2>
     <div class="field"><div class="field-label">${t('article')}</div><div class="field-value">${item.article}</div></div>
     <div class="field"><div class="field-label">${t('原文')}</div><div class="field-value">${item.originalText}</div></div>
     <div class="field"><div class="field-label">${t('中文翻译')}</div><div class="field-value">${item.chineseTranslation}</div></div>
