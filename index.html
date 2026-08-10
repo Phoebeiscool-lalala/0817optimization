@@ -486,13 +486,6 @@ body{font-size:17px;line-height:1.72}
       <div class="kpi"><div class="kpi-v" id="kUpdated">-</div><div class="kpi-l" data-i18n="最后更新">最后更新</div></div>
     </div>
 
-    <h4><span class="dot"></span><span data-i18n="complianceRisk">合规风险评估</span></h4>
-    <div class="rcard">
-      <div class="risk-label"><span data-i18n="overallScore">总体风险分数</span><span id="riskScore">78/100</span></div>
-      <div class="progress"><div class="progress-bar" id="riskBar" style="width:78%;background:var(--gradient)"></div></div>
-      <div style="font-size:0.62rem;color:var(--text3);margin-top:4px" data-i18n="riskNote">基于最近法规变化评估</div>
-    </div>
-
     <h4><span class="dot"></span>📅 <span data-i18n="upcomingDates">即将生效</span></h4>
     <div id="upcomingList"></div>
   </div>
@@ -956,7 +949,6 @@ function renderTimeline() {
           <div class="tl-article">${t('article')}: ${item.article}</div>
           <div class="tl-summary">${currentLang==='en'?(item.summary_en||item.chineseTranslation):item.chineseTranslation}</div>
           <div class="tl-tags">
-            <span class="tl-tag ${item.importance}">${item.importance.toUpperCase()}</span>
             <span class="tl-tag mod">${item.category}</span>
           </div>
           <div class="tl-detail">
@@ -994,7 +986,6 @@ function renderLawCards() {
       <div class="lc-top">
         <span class="lc-flag">${item.flag}</span>
         <span class="lc-country">${item.country}</span>
-        <span class="lc-badge ${item.importance}">${item.importance.toUpperCase()}</span>
       </div>
       <div class="lc-title">${item.lawName}</div>
       <div class="lc-meta">
@@ -1025,22 +1016,11 @@ function openDetail(id) {
         <div class="dp-row"><div class="dp-label">${isEn?'Law Title':'法律名称'}</div><div class="dp-val" style="font-weight:700">${item.lawName}</div></div>
         <div class="dp-row"><div class="dp-label">${isEn?'Article':'条款'}</div><div class="dp-val">${item.article}</div></div>
         <div class="dp-row"><div class="dp-label">${isEn?'Effective':'生效日期'}</div><div class="dp-val">${item.effectiveDate}</div></div>
-        <div class="dp-row"><div class="dp-label">${isEn?'Impact':'影响等级'}</div><div class="dp-val"><span class="dp-tag ${item.importance}" style="background:rgba(${item.importance==='high'?'239,68,68':item.importance==='medium'?'245,158,11':'34,197,94'},0.12);color:var(--${item.importance})">${item.importance.toUpperCase()}</span></div></div>
         <div class="dp-row"><div class="dp-label">${isEn?'Category':'类别'}</div><div class="dp-val">${item.category}</div></div>
         <div class="dp-row"><div class="dp-label">${isEn?'Original Text':'原文'}</div><div class="dp-val" style="font-size:0.7rem;color:var(--text2)">${item.originalText}</div></div>
         <div class="dp-row"><div class="dp-label">${isEn?'Translation':'中文翻译'}</div><div class="dp-val" style="font-size:0.7rem;color:var(--text2)">${item.chineseTranslation}</div></div>
         <div class="dp-row"><div class="dp-label">${isEn?'Official Source':'官方来源'}</div><div class="dp-val"><a href="${item.officialUrl}" target="_blank">${isEn?'View Original Source →':'查看官方来源 ↗'}</a></div></div>
         ${countryDetailPages[item.country] ? `<button class="btn-fullview" onclick="openCountryPage('${item.country}','${item.flag}')">📖 ${isEn?'View Full Country Law Page':'查看完整国家法规页面'}</button>` : ''}
-      </div>
-      <div class="dp-section">
-        <h4>🤖 ${isEn?'AI Analysis':'AI 分析'}</h4>
-        ${ai ? `
-        <div class="dp-row"><div class="dp-label">${isEn?'AI Summary':'AI 摘要'}</div><div class="dp-val" style="font-size:0.7rem;line-height:1.6">${isEn?(ai.summary_en||ai.summary):ai.summary}</div></div>
-        <div class="dp-row"><div class="dp-label">${isEn?'Business Impact':'业务影响'}</div><div class="dp-val" style="font-size:0.7rem;line-height:1.6;color:var(--text2)">${isEn?(ai.summary_en||ai.summary):ai.summary}</div></div>
-        <div class="dp-row"><div class="dp-label">${isEn?'Affected Modules':'受影响模块'}</div><div class="dp-val">${ai.modules.map(m=>`<span class="dp-tag mod">${m}</span>`).join('')}</div></div>
-        <div class="dp-row"><div class="dp-label">${isEn?'Risk Level':'风险等级'}</div><div class="dp-val"><span class="dp-tag" style="background:rgba(${ai.impact==='high'?'239,68,68':ai.impact==='medium'?'245,158,11':'34,197,94'},0.12);color:var(--${ai.impact})">${ai.impact.toUpperCase()}</span></div></div>
-        <div class="dp-row"><div class="dp-label">${isEn?'AI Recommendation':'AI 建议'}</div><div class="dp-val">${((isEn?(ai.recommendation_en||ai.recommendation):ai.recommendation)||'').split('。').filter(Boolean).map(r=>`<div class="dp-check">${r.trim()}。</div>`).join('')}</div></div>
-        ` : `<div style="font-size:0.72rem;color:var(--text3);padding:20px 0;text-align:center">${isEn?'No AI analysis available':'暂无 AI 分析数据'}</div>`}
       </div>
     </div>`;
   document.getElementById('detailOverlay').classList.add('open');
@@ -1119,10 +1099,8 @@ function openDrawer(id) {
   document.getElementById('drawerContent').innerHTML = `
     <h2>${item.flag} ${item.country} — ${item.lawName}</h2>
     <div class="field"><div class="field-label">${t('article')}</div><div class="field-value">${item.article}</div></div>
-    <div class="field"><div class="field-label">${t('impact')}</div><div class="field-value"><span class="tl-tag ${item.importance}">${item.importance.toUpperCase()}</span></div></div>
     <div class="field"><div class="field-label">${t('原文')}</div><div class="field-value">${item.originalText}</div></div>
     <div class="field"><div class="field-label">${t('中文翻译')}</div><div class="field-value">${item.chineseTranslation}</div></div>
-    <div class="field"><div class="field-label">${t('变更历史')}</div><div class="field-value">${item.history.map(h=>`<div style="margin-bottom:4px"><strong>${h.date}</strong> ${h.change}</div>`).join('')}</div></div>
     <div class="field"><div class="field-label">${t('effective')}</div><div class="field-value">${item.effectiveDate}</div></div>
     ${ai ? `<div class="field"><div class="field-label">🤖 ${t('aiSummary')}</div><div class="field-value">${lang==='en'?(ai.summary_en||ai.summary):ai.summary}</div></div>
     <div class="field"><div class="field-label">💡 ${t('aiRecommendation')}</div><div class="field-value" style="border-left:3px solid var(--accent);padding-left:8px">${lang==='en'?(ai.recommendation_en||ai.recommendation):ai.recommendation}</div></div>` : ''}
