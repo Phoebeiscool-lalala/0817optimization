@@ -1434,13 +1434,13 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCountry
 function renderTicker() {
   const track = document.getElementById('tickerTrack');
   if (!track) return;
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  const twoYearsAgo = new Date();
+  twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
   const recentData = laborLawData
-    .filter(item => new Date(item.effectiveDate) >= oneYearAgo)
+    .filter(item => new Date(item.effectiveDate) >= twoYearsAgo)
     .sort((a, b) => new Date(b.effectiveDate) - new Date(a.effectiveDate));
 
   if (recentData.length === 0) { track.innerHTML = '<div style="padding:10px 20px;color:var(--text3);font-size:0.7rem">暂无更新</div>'; return; }
