@@ -412,8 +412,8 @@ body{font-size:17px;line-height:1.72}
     <div class="left-filters">
       <select class="fsel" id="filterRegion" onchange="applyFilters()">
         <option value="" data-i18n="all">全部</option>
-        <option value="Asia">Asia</option><option value="Europe">Europe</option><option value="Americas">Americas</option>
-        <option value="Africa">Africa</option><option value="Oceania">Oceania</option>
+        <option value="Asia">亚洲</option><option value="Europe">欧洲</option><option value="Americas">美洲</option>
+        <option value="Africa">非洲</option><option value="Oceania">大洋洲</option>
       </select>
       <select class="fsel" id="filterCountry" onchange="onCountrySelectChange()"><option value="" data-i18n="all">全部</option></select>
       <select class="fsel" id="filterBiz" onchange="onBizChange()" title="业务节点">
@@ -539,7 +539,7 @@ let currentLang = localStorage.getItem('hr_lang') || 'zh';
 const i18n = {
   zh: {
     title:'🌐 全球劳动法汇总系统 v3.0', searchPlaceholder:'搜索法规...', all:'全部', sortDate:'按更新日期', sortCountry:'按国家',
-    heroTitle:'🤖 AI Employment Law Monitor', heroSub:'AI 自动监控各国家/地区劳动法更新',
+    heroTitle:'🤖 AI 智能劳动法监控', heroSub:'近 3 年各国/地区劳动法更新动态',
     kpiTitle:'关键指标', 法规总数:'法规总数', 覆盖国家:'覆盖国家', 法规类别:'法规类别', 最后更新:'最后更新',
     complianceRisk:'合规风险评估', overallScore:'总体风险分数', riskNote:'基于最近法规变化评估',
     aiInsights:'AI 洞察', aiInsight1:'本周有 3 个国家更新了劳动法规，建议重点关注新加坡和泰国的变化。',
@@ -554,7 +554,7 @@ const i18n = {
     离职与遣散:'离职与遣散', 个税:'个税', 培训发展:'培训发展',
     年假:'年假', 病假:'病假', 产假:'产假', 赔偿金:'赔偿金', 育儿假:'育儿假', 丧假:'丧假', 婚假:'婚假', 其他假期:'其他假期',
     社保规定:'社保规定', 工作时间:'工作时间', 入职离职:'入职离职', 离职结算:'离职结算', 劳动合同:'劳动合同', 工资:'工资',
-    today:'今天', yesterday:'昨天', thisWeek:'本周', earlier:'更早', selectLaw:'← 从上方列表选择一条法规查看详情', libTitle:'📚 就业法规库',
+    today:'今天', yesterday:'昨天', thisWeek:'本周', earlier:'更早', selectLaw:'← 从上方列表选择一条法规查看详情', libTitle:'📚 就业法规库', libSub:'所选国家/地区的全部就业法规',
     viewDetails:'查看详情', effective:'生效', published:'发布', impact:'影响', modules:'受影响模块',
     aiSummary:'AI 摘要', aiRecommendation:'AI 建议', officialSource:'官方来源', article:'条款',
     原文:'原文', 中文翻译:'中文翻译', 变更历史:'变更历史', 查看官方:'查看官方',
@@ -639,6 +639,8 @@ function switchLang(lang){
 // Init lang
 document.getElementById('langBtn').textContent = {zh:'🌐 中文',en:'🌐 English',es:'🌐 Español'}[currentLang];
 document.getElementById('settingsLang').value = currentLang;
+// Apply i18n on page load
+setTimeout(() => switchLang(currentLang), 0);
 
 // ============ DATA ============
 const laborLawData = [
@@ -882,19 +884,34 @@ function applyFilters() {
 }
 
 // ============ POPULATE FILTERS ============
+const countryNameMap = {
+  'Singapore':'新加坡','Malaysia':'马来西亚','Thailand':'泰国','Philippines':'菲律宾',
+  'Indonesia':'印度尼西亚','Vietnam':'越南','Japan':'日本','South Korea':'韩国',
+  'China':'中国','India':'印度','Australia':'澳大利亚','New Zealand':'新西兰',
+  'United Kingdom':'英国','Germany':'德国','France':'法国','Netherlands':'荷兰',
+  'Ireland':'爱尔兰','Italy':'意大利','Spain':'西班牙','Poland':'波兰',
+  'United States':'美国','Canada':'加拿大','Brazil':'巴西','Mexico':'墨西哥',
+  'South Africa':'南非','Nigeria':'尼日利亚','Egypt':'埃及','UAE':'阿联酋',
+  'Saudi Arabia':'沙特阿拉伯','Turkey':'土耳其','Bangladesh':'孟加拉国','Sri Lanka':'斯里兰卡',
+  'Hong Kong':'中国香港','Taiwan':'中国台湾','Myanmar':'缅甸','Cambodia':'柬埔寨',
+  'Laos':'老挝','Pakistan':'巴基斯坦','Nepal':'尼泊尔','Qatar':'卡塔尔'
+};
 function populateCountryFilter() {
   const sel = document.getElementById('filterCountry');
   const countries = [...new Set(laborLawData.map(d => d.country))].sort();
-  sel.innerHTML = `<option value="" data-i18n="all">${t('all')}</option>` + countries.map(c => `<option value="${c}">${c}</option>`).join('');
+  sel.innerHTML = `<option value="" data-i18n="all">${t('all')}</option>` + countries.map(c => `<option value="${c}">${countryNameMap[c]||c}</option>`).join('');
 }
 
 // ============ HERO CHIPS ============
 function renderHeroChips() {
-  const regions = ['All','Asia','Europe','Americas'];
+  const regions = [
+    {val:'', label:t('all')},
+    {val:'Asia', label:'亚洲'},
+    {val:'Europe', label:'欧洲'},
+    {val:'Americas', label:'美洲'}
+  ];
   document.getElementById('heroChips').innerHTML = regions.map(r => {
-    const label = r === 'All' ? t('all') : r;
-    const val = r === 'All' ? '' : r;
-    return `<div class="chip ${document.getElementById('filterRegion').value===val?'on':''}" onclick="document.getElementById('filterRegion').value='${val}';applyFilters();renderHeroChips()">${label}</div>`;
+    return `<div class="chip ${document.getElementById('filterRegion').value===r.val?'on':''}" onclick="document.getElementById('filterRegion').value='${r.val}';applyFilters();renderHeroChips()">${r.label}</div>`;
   }).join('');
 }
 
