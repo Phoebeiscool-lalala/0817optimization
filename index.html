@@ -1,409 +1,274 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Global HR AI Platform V3</title>
+<title>Global Labor Law Intelligence Dashboard</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0a0e1a;--bg2:#111827;--card:rgba(15,23,42,0.85);--card-hover:rgba(20,30,55,0.95);
-  --border:rgba(56,189,248,0.12);--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
-  --accent:#06b6d4;--accent2:#3b82f6;--accent3:#8b5cf6;
-  --high:#ef4444;--medium:#f59e0b;--low:#22c55e;
-  --radius:10px;--radius-sm:6px;--header-h:48px;--left-w:240px;--right-w:300px;
-  --globe-bg:#0c1220;
-  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC",sans-serif;
-  --gradient:linear-gradient(135deg,#06b6d4,#3b82f6,#8b5cf6);
+  --bg:#f8fafc;--bg2:#ffffff;--surface:#f1f5f9;
+  --card:#ffffff;--card-hover:#f8fafc;
+  --border:#e2e8f0;--border-light:#f1f5f9;
+  --text:#0f172a;--text2:#475569;--text3:#94a3b8;
+  --accent:#2563eb;--accent-light:#eff6ff;
+  --green:#16a34a;--green-bg:#f0fdf4;
+  --orange:#ea580c;--orange-bg:#fff7ed;
+  --red:#dc2626;--red-bg:#fef2f2;
+  --blue:#2563eb;--blue-bg:#eff6ff;
+  --purple:#7c3aed;
+  --radius:12px;--radius-sm:8px;--radius-xs:6px;--radius-pill:999px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.05);
+  --shadow:0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+  --header-h:50px;--ticker-h:42px;
+  --left-w:220px;--right-w:220px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC","Helvetica Neue",sans-serif;
 }
-[data-theme="light"]{
-  --bg:#f0f2f5;--bg2:#ffffff;--card:#fff;--card-hover:#f8fafc;
-  --border:#e2e8f0;--text:#1e293b;--text2:#64748b;--text3:#94a3b8;
-  --accent:#3b82f6;--accent2:#8b5cf6;--accent3:#06b6d4;
-  --globe-bg:#e8edf5;
+[data-theme="dark"]{
+  --bg:#0a0e1a;--bg2:#111827;--surface:#1e293b;
+  --card:rgba(15,23,42,0.85);--card-hover:rgba(20,30,55,0.95);
+  --border:rgba(56,189,248,0.12);--border-light:rgba(56,189,248,0.06);
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+  --accent:#3b82f6;--accent-light:rgba(59,130,246,0.1);
+  --green:#22c55e;--green-bg:rgba(34,197,94,0.1);
+  --orange:#f59e0b;--orange-bg:rgba(245,158,11,0.1);
+  --red:#ef4444;--red-bg:rgba(239,68,68,0.1);
+  --blue:#3b82f6;--blue-bg:rgba(59,130,246,0.1);
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.2);
+  --shadow:0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.3);
 }
 html,body{height:100%;overflow:hidden}
-body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;flex-direction:column;font-size:13px;line-height:1.5}
 
-/* ========== HEADER ========== */
-.header{height:var(--header-h);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100;flex-shrink:0}
-.header-logo{font-size:0.88rem;font-weight:700;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header-actions{display:flex;align-items:center;gap:4px}
-.hbtn{background:none;border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.72rem;display:inline-flex;align-items:center;gap:4px;transition:all .2s}
-.hbtn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
-.hbtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.theme-toggle{background:none;border:1px solid var(--border);color:var(--text);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.theme-toggle:hover{background:var(--accent);color:#fff}
+.header{height:var(--header-h);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100;flex-shrink:0}
+.header-left{display:flex;flex-direction:column;gap:0}
+.header-title{font-size:20px;font-weight:700;letter-spacing:-0.3px;line-height:1.2}
+.header-title .g1{background:linear-gradient(135deg,#2563eb,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-subtitle{font-size:11px;color:var(--text3);letter-spacing:0.3px}
+.header-actions{display:flex;align-items:center;gap:6px}
+.hbtn{background:var(--card);border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:var(--radius-pill);cursor:pointer;font-size:12px;display:inline-flex;align-items:center;gap:4px;transition:all .15s;font-family:var(--font)}
+.hbtn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.theme-btn{background:var(--card);border:1px solid var(--border);color:var(--text2);width:30px;height:30px;border-radius:var(--radius-sm);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+.notif-btn{position:relative;background:var(--card);border:1px solid var(--border);color:var(--text2);width:30px;height:30px;border-radius:var(--radius-sm);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.notif-btn:hover{border-color:var(--accent);color:var(--accent)}
+.notif-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg2)}
 
-/* ========== DROPDOWN ========== */
+.latest-ticker{width:100%;height:var(--ticker-h);background:var(--bg2);border-bottom:1px solid var(--border);overflow:hidden;flex-shrink:0;display:flex;align-items:center}
+.ticker-inner{display:flex;align-items:center;width:100%}
+.ticker-label{flex-shrink:0;padding:0 14px;font-size:12px;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.ticker-label .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ticker-wrap{flex:1;overflow:hidden;position:relative;mask-image:linear-gradient(to right,transparent 0,#000 3%,#000 93%,transparent 100%);-webkit-mask-image:linear-gradient(to right,transparent 0,#000 3%,#000 93%,transparent 100%)}
+.ticker-track{display:flex;align-items:center;gap:0;width:max-content}
+.ticker-track.auto{animation:tickerScroll 80s linear infinite}
+.ticker-track:hover,.ticker-wrap:hover .ticker-track{animation-play-state:paused!important}
+@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tc-item{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:4px 14px;cursor:pointer;border-radius:var(--radius-pill);white-space:nowrap;transition:background .15s;margin:0 2px}
+.tc-item:hover{background:var(--accent-light)}
+.tc-item .flag{font-size:14px}
+.tc-item .name{font-size:12px;font-weight:600;color:var(--text)}
+.tc-item .sep{color:var(--text3);font-size:11px}
+.tc-item .cat{font-size:11px;color:var(--accent)}
+.tc-item .title{font-size:12px;color:var(--text2)}
+.tc-item .date{font-size:11px;color:var(--text3)}
+.tc-item .new-tag{font-size:8px;font-weight:700;color:#fff;background:var(--accent);padding:1px 5px;border-radius:var(--radius-pill);line-height:1.4}
+.ticker-viewall{flex-shrink:0;padding:4px 14px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;white-space:nowrap;border-radius:var(--radius-pill);transition:background .15s}
+.ticker-viewall:hover{background:var(--accent-light)}
+
 .dd-wrap{position:relative}
-.dd-menu{position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);min-width:140px;display:none;z-index:200;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.dd-menu{position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);min-width:130px;display:none;z-index:200;overflow:hidden;box-shadow:var(--shadow-md)}
 .dd-menu.open{display:block}
-.dd-menu div{padding:8px 12px;font-size:0.75rem;cursor:pointer;color:var(--text);transition:background .15s}
-.dd-menu div:hover{background:var(--accent);color:#fff}
-.dd-menu .sep{height:1px;background:var(--border);padding:0;margin:2px 0}
+.dd-menu div{padding:7px 12px;font-size:12px;cursor:pointer;color:var(--text);transition:background .15s}
+.dd-menu div:hover{background:var(--accent-light);color:var(--accent)}
 
-/* ========== NOTIFICATION PANEL ========== */
-.notif-panel{position:fixed;top:var(--header-h);right:0;width:360px;height:calc(100vh - var(--header-h));background:var(--bg2);border-left:1px solid var(--border);z-index:150;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column}
+.notif-panel{position:fixed;top:var(--header-h);right:0;width:340px;height:calc(100vh - var(--header-h));background:var(--bg2);border-left:1px solid var(--border);z-index:150;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column}
 .notif-panel.open{transform:translateX(0)}
-.notif-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.notif-header h3{font-size:0.88rem;font-weight:700}
-.notif-body{flex:1;overflow-y:auto;padding:8px 0}
-.notif-group-label{padding:6px 16px;font-size:0.68rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px}
-.notif-item{padding:10px 16px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start}
+.notif-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.notif-header h3{font-size:14px;font-weight:700}
+.notif-body{flex:1;overflow-y:auto;padding:6px 0}
+.notif-group-label{padding:6px 16px;font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px}
+.notif-item{padding:10px 16px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--border-light);display:flex;gap:10px;align-items:flex-start}
 .notif-item:hover{background:var(--card-hover)}
-.notif-item .ni-flag{font-size:1.1rem;flex-shrink:0;margin-top:2px}
+.notif-item .ni-flag{font-size:1.1rem;flex-shrink:0;margin-top:1px}
 .notif-item .ni-body{flex:1;min-width:0}
-.notif-item .ni-title{font-size:0.78rem;font-weight:600;margin-bottom:2px}
-.notif-item .ni-sub{font-size:0.68rem;color:var(--text2)}
-.notif-item .ni-date{font-size:0.62rem;color:var(--text3);margin-top:2px}
-.notif-item .ni-badge{background:var(--high);color:#fff;font-size:0.55rem;padding:1px 5px;border-radius:8px;font-weight:700;flex-shrink:0;margin-top:2px}
+.notif-item .ni-title{font-size:12px;font-weight:600;margin-bottom:1px}
+.notif-item .ni-sub{font-size:11px;color:var(--text2)}
+.notif-item .ni-date{font-size:10px;color:var(--text3);margin-top:2px}
+.notif-item .ni-badge{background:var(--red);color:#fff;font-size:8px;padding:1px 5px;border-radius:var(--radius-pill);font-weight:700;flex-shrink:0;margin-top:2px}
 
-/* ========== MAIN LAYOUT ========== */
 .main{flex:1;display:grid;grid-template-columns:var(--left-w) 1fr var(--right-w);overflow:hidden}
 
-/* ========== LEFT COLUMN ========== */
-.left{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-.left-search{padding:10px 12px;border-bottom:1px solid var(--border)}
-.sinput{width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-size:0.75rem;outline:none}
-.sinput:focus{border-color:var(--accent)}
-.left-filters{padding:6px 12px;border-bottom:1px solid var(--border);display:flex;gap:4px;flex-wrap:wrap}
-.fsel{padding:4px 6px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-size:0.68rem;cursor:pointer}
-.left-tree{flex:1;overflow-y:auto;padding:6px 0}
-.tree-item{cursor:pointer}
-.tree-label{display:flex;align-items:center;gap:6px;padding:5px 12px;font-size:0.73rem;color:var(--text2);cursor:pointer;transition:all .15s}
-.tree-label:hover{color:var(--accent);background:var(--card-hover)}
-.tree-label.active{color:var(--accent);background:var(--card)}
-.tree-arrow{font-size:0.55rem;transition:transform .2s;width:12px;text-align:center}
-.tree-item.open>.tree-label>.tree-arrow{transform:rotate(90deg)}
-.tree-sub{display:none;padding-left:12px}
-.tree-item.open>.tree-sub{display:block}
-.tree-sub li{list-style:none;padding:4px 12px;font-size:0.68rem;color:var(--text3);cursor:pointer;border-radius:var(--radius-sm);margin:1px 8px;transition:all .15s}
-.tree-sub li:hover{color:var(--text);background:var(--card-hover)}
-.tree-sub li.active{color:var(--accent);background:var(--card);font-weight:600}
-.tree-sub-item{list-style:none;padding:4px 12px 4px 24px;font-size:0.65rem;color:var(--text3);cursor:pointer;border-radius:var(--radius-sm);margin:1px 8px;transition:all .15s}
-.tree-sub-item:hover{color:var(--text);background:var(--card-hover)}
-.tree-sub-item.active{color:var(--accent);background:var(--card);font-weight:600}
-.left-globe{border-top:1px solid var(--border);padding:8px 12px;position:relative;min-height:230px}
-.globe-info{font-size:0.6rem;color:var(--text3);margin-bottom:6px}
-/* ---- Leaflet interactive map (Google/Apple Maps style) ---- */
-.map-shell{position:relative;width:100%;height:210px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
-#leafletMap{width:100%;height:100%;background:#aad3df}
-.leaflet-container{font-family:var(--font);background:#aad3df}
-.leaflet-control-zoom{border:none!important;box-shadow:0 2px 8px rgba(0,0,0,.25)!important}
-.leaflet-control-zoom a{background:var(--bg2)!important;color:var(--text)!important;border:none!important;width:24px!important;height:24px!important;line-height:24px!important;font-size:14px!important}
+.left{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;background:var(--bg2)}
+.panel-section{padding:12px 14px;border-bottom:1px solid var(--border-light)}
+.panel-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.filter-select{width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--card);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--font);outline:none;transition:border-color .15s;height:36px}
+.filter-select:focus{border-color:var(--accent)}
+.filter-row{margin-bottom:6px}
+.filter-row:last-child{margin-bottom:0}
+.filter-row label{display:block;font-size:11px;color:var(--text3);margin-bottom:3px}
+.reset-btn{width:100%;padding:5px;border:1px solid var(--border);border-radius:var(--radius-xs);background:transparent;color:var(--text2);font-size:11px;cursor:pointer;font-family:var(--font);transition:all .15s;margin-top:6px}
+.reset-btn:hover{border-color:var(--accent);color:var(--accent)}
+.map-section{padding:12px 14px;flex:1;display:flex;flex-direction:column;overflow:hidden}
+.map-info{font-size:11px;color:var(--text3);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.map-shell{position:relative;width:100%;flex:1;min-height:180px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+#leafletMap{width:100%;height:100%;background:#e8edf5}
+[data-theme="dark"] #leafletMap{background:#1a1d24}
+.leaflet-container{font-family:var(--font)}
+.leaflet-control-zoom{border:none!important;box-shadow:var(--shadow)!important}
+.leaflet-control-zoom a{background:var(--bg2)!important;color:var(--text)!important;border:1px solid var(--border)!important;width:26px!important;height:26px!important;line-height:26px!important;font-size:13px!important;border-radius:var(--radius-xs)!important}
 .leaflet-control-zoom a:hover{background:var(--accent)!important;color:#fff!important}
 .leaflet-interactive{transition:fill-opacity .2s,fill .2s;outline:none}
-.map-return-btn{position:absolute;top:8px;left:8px;z-index:600;display:none;align-items:center;gap:4px;
-  background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:16px;padding:5px 11px;
-  font-size:0.62rem;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25);transition:all .2s}
+.map-return-btn{position:absolute;top:6px;left:6px;z-index:600;display:none;align-items:center;gap:3px;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-pill);padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;box-shadow:var(--shadow);transition:all .15s}
 .map-return-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 .map-return-btn.show{display:inline-flex}
-.map-chip{position:absolute;bottom:8px;left:8px;right:8px;z-index:600;display:none;
-  background:var(--bg2);border:1px solid var(--accent);border-radius:var(--radius-sm);padding:7px 10px;
-  box-shadow:0 4px 12px rgba(0,0,0,.3);animation:chipUp .28s ease}
+.map-chip{position:absolute;bottom:6px;left:6px;right:6px;z-index:600;display:none;background:var(--bg2);border:1px solid var(--accent);border-radius:var(--radius-sm);padding:6px 10px;box-shadow:var(--shadow-md);animation:chipUp .25s ease}
 .map-chip.show{display:block}
-@keyframes chipUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.map-chip .mc-name{font-size:0.72rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:5px}
-.map-chip .mc-count{font-size:0.6rem;color:var(--text2);margin-top:1px}
+@keyframes chipUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.map-chip .mc-name{font-size:12px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:4px}
+.map-chip .mc-count{font-size:11px;color:var(--text2);margin-top:1px}
 .globe-legend{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
-.gleg{font-size:0.58rem;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:3px;padding:2px 5px;border-radius:8px;transition:all .15s}
-.gleg:hover{color:var(--accent);background:var(--card)}
-.gleg.on{color:var(--accent);background:var(--card);font-weight:700}
+.gleg{font-size:11px;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:3px;padding:2px 6px;border-radius:var(--radius-pill);transition:all .15s}
+.gleg:hover,.gleg.on{color:var(--accent);background:var(--accent-light);font-weight:600}
 .gdot{width:6px;height:6px;border-radius:50%}
-.leaflet-tooltip.map-tip{background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:6px;
-  box-shadow:0 2px 8px rgba(0,0,0,.3);font-size:0.65rem;font-weight:600;padding:3px 8px}
+.leaflet-tooltip.map-tip{background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);font-size:11px;font-weight:600;padding:3px 8px}
 .leaflet-tooltip.map-tip::before{display:none}
 
-/* ========== CENTER COLUMN ========== */
 .center{display:flex;flex-direction:column;overflow:hidden}
-.hero-chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
-.chip{padding:4px 10px;border-radius:12px;font-size:0.65rem;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text2);transition:all .2s}
-.chip:hover,.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-.center-split{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.center-top{flex:1;min-height:0;overflow-y:auto;padding:12px 20px 8px;border-bottom:2px solid var(--border)}
-.center-bottom{flex:1;min-height:0;overflow-y:auto;padding:12px 20px}
-.section-header{margin-bottom:10px}
-.section-title{font-size:0.88rem;font-weight:800;display:flex;align-items:center;gap:6px}
-.section-title .ai-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
-.section-title .lib-dot{width:8px;height:8px;border-radius:50%;background:var(--accent3)}
-.section-sub{font-size:0.68rem;color:var(--text2);margin-top:2px}
-.lib-count{font-size:0.65rem;color:var(--text3);margin-bottom:8px}
-.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
-.law-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.law-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
-.law-card.high::before{background:var(--high)}
-.law-card.medium::before{background:var(--medium)}
-.law-card.low::before{background:var(--low)}
-.law-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.25)}
-.law-card.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(6,182,212,0.3)}
-.lc-top{display:flex;align-items:center;gap:6px;margin-bottom:6px}
-.lc-flag{font-size:1.1rem}
-.lc-country{font-size:0.72rem;font-weight:700}
-.lc-badge{font-size:0.55rem;padding:2px 6px;border-radius:8px;font-weight:700;margin-left:auto}
-.lc-badge.high{background:rgba(239,68,68,0.15);color:var(--high)}
-.lc-badge.medium{background:rgba(245,158,11,0.15);color:var(--medium)}
-.lc-badge.low{background:rgba(34,197,94,0.15);color:var(--low)}
-.lc-title{font-size:0.8rem;font-weight:700;margin-bottom:4px;line-height:1.3}
-.lc-meta{display:flex;gap:8px;margin-bottom:6px;font-size:0.6rem;color:var(--text3)}
-.lc-meta span{display:flex;align-items:center;gap:3px}
-.lc-summary{font-size:0.68rem;color:var(--text2);line-height:1.45;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.lc-footer{display:flex;align-items:center;justify-content:space-between}
-.lc-cat{font-size:0.58rem;padding:2px 6px;border-radius:8px;background:rgba(6,182,212,0.1);color:var(--accent);border:1px solid rgba(6,182,212,0.2)}
-.lc-status{font-size:0.55rem;padding:2px 6px;border-radius:8px;font-weight:600}
-.lc-status.active{background:rgba(34,197,94,0.12);color:var(--low)}
-.lc-status.amended{background:rgba(245,158,11,0.12);color:var(--medium)}
-.lc-link{font-size:0.65rem;color:var(--accent);cursor:pointer;text-decoration:none;font-weight:600}
-.lc-link:hover{text-decoration:underline}
-.lib-empty{grid-column:1/-1;text-align:center;padding:30px;color:var(--text3);font-size:0.78rem}
-/* Detail overlay for card click */
-.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;display:none;align-items:center;justify-content:center}
-.detail-overlay.open{opacity:1;pointer-events:all;display:flex}
-.detail-panel{display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);width:680px;max-width:92vw;max-height:85vh;overflow-y:auto;padding:24px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:210}
-.detail-panel.open{display:block}
-.detail-panel .dp-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text2);font-size:1rem;cursor:pointer}
-.dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.dp-section h4{font-size:0.72rem;font-weight:700;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.dp-row{margin-bottom:8px}
-.dp-label{font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px}
-.dp-val{font-size:0.75rem;color:var(--text);line-height:1.5}
-.dp-val a{color:var(--accent);text-decoration:none}
-.dp-tag{display:inline-block;font-size:0.6rem;padding:3px 8px;border-radius:10px;margin:2px 4px 2px 0}
-.dp-tag.mod{background:rgba(6,182,212,0.12);color:var(--accent);border:1px solid rgba(6,182,212,0.25)}
-.dp-check{font-size:0.72rem;color:var(--text2);margin-bottom:5px;display:flex;align-items:flex-start;gap:6px}
-.dp-check::before{content:'✔';color:var(--low);font-weight:700;flex-shrink:0}
-.ai-section-title{font-size:0.72rem;font-weight:700;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.ai-section-title .ai-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
-.tl-group{margin-bottom:16px}
-.tl-year{font-size:0.72rem;font-weight:800;color:var(--accent);padding:4px 0;display:flex;align-items:center;gap:8px}
+.center-scroll{flex:1;overflow-y:auto}
+
+.hero-section{padding:20px 24px 16px;border-bottom:1px solid var(--border-light);background:var(--bg2);text-align:center}
+.hero-tag{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.hero-title{font-size:20px;font-weight:700;margin-bottom:2px;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:12px;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+.hero-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--radius-pill);background:var(--green-bg);color:var(--green);font-size:10px;font-weight:700}
+.hero-badge .dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.hero-search{width:100%;padding:10px 14px 10px 36px;border:1px solid var(--border);border-radius:22px;background:var(--card);color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:border-color .15s;height:44px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center}
+.hero-search:focus{border-color:var(--accent)}
+.hero-tabs{display:flex;gap:4px;margin-top:12px;justify-content:center;flex-wrap:wrap}
+.tab-btn{padding:5px 14px;border-radius:var(--radius-pill);font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all .15s;font-family:var(--font);font-weight:500}
+.tab-btn:hover{border-color:var(--accent);color:var(--accent)}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.timeline-section{padding:16px 24px 8px}
+.section-title-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.tl-group{margin-bottom:14px}
+.tl-year{font-size:14px;font-weight:800;color:var(--accent);padding:4px 0;display:flex;align-items:center;gap:8px}
 .tl-year::after{content:'';flex:1;height:1px;background:var(--border)}
-.tl-month{font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;padding:2px 0 4px 8px;letter-spacing:1px}
-.tl-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.tl-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
-.tl-card.high::before{background:var(--high)}
-.tl-card.medium::before{background:var(--medium)}
-.tl-card.low::before{background:var(--low)}
-.tl-card:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
-.tl-top{display:flex;align-items:center;gap:6px;margin-bottom:4px}
-.tl-flag{font-size:0.95rem}
-.tl-country{font-size:0.72rem;font-weight:700}
-.tl-date{font-size:0.6rem;color:var(--text3);margin-left:auto}
-.tl-law{font-size:0.78rem;font-weight:600;margin-bottom:3px}
-.tl-article{font-size:0.62rem;color:var(--text3);margin-bottom:4px}
-.tl-summary{font-size:0.68rem;color:var(--text2);line-height:1.4;margin-bottom:6px}
-.tl-tags{display:flex;gap:4px;flex-wrap:wrap}
-.tl-tag{font-size:0.58rem;padding:2px 6px;border-radius:8px;font-weight:600}
-.tl-tag.high{background:rgba(239,68,68,0.15);color:var(--high)}
-.tl-tag.medium{background:rgba(245,158,11,0.15);color:var(--medium)}
-.tl-tag.low{background:rgba(34,197,94,0.15);color:var(--low)}
-.tl-tag.mod{background:rgba(6,182,212,0.1);color:var(--accent);border:1px solid rgba(6,182,212,0.2)}
-.tl-detail{display:none;padding:10px 12px;background:var(--bg2);border-radius:var(--radius-sm);margin-top:6px;font-size:0.68rem;border:1px solid var(--border)}
-.tl-card.exp .tl-detail{display:block}
-.tl-detail h4{font-size:0.72rem;font-weight:700;margin-bottom:6px}
-.tl-detail p{color:var(--text2);line-height:1.5;margin-bottom:6px}
-.tl-detail .rec{border-left:3px solid var(--accent);padding-left:8px;color:var(--text2);font-style:italic}
+.tl-entry{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border-light);cursor:pointer;transition:background .15s;max-width:800px}
+.tl-entry:hover{background:var(--surface);border-radius:var(--radius-xs);margin:0 -8px;padding:8px}
+.tl-left{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;width:70px;padding-top:2px}
+.tl-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);margin-bottom:4px}
+.tl-date{font-size:11px;color:var(--text3);white-space:nowrap}
+.tl-right{flex:1;min-width:0}
+.tl-meta{display:flex;align-items:center;gap:6px;margin-bottom:2px;flex-wrap:wrap}
+.tl-flag{font-size:14px}
+.tl-country{font-size:13px;font-weight:600}
+.tl-cat{font-size:11px;color:var(--accent);padding:1px 6px;background:var(--accent-light);border-radius:var(--radius-pill);font-weight:600}
+.tl-law{font-size:13px;font-weight:600;margin-bottom:1px}
+.tl-summary{font-size:12px;color:var(--text2);line-height:1.45;margin-bottom:2px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.tl-link{font-size:12px;color:var(--accent);font-weight:600;cursor:pointer}
+.tl-link:hover{text-decoration:underline}
 
-/* ========== RIGHT COLUMN ========== */
-.right{border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:12px}
-.right h4{font-size:0.75rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.right h4 .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
-.rcard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px;margin-bottom:10px}
+.library-section{padding:16px 24px 24px;border-top:1px solid var(--border-light)}
+.lib-count{font-size:12px;color:var(--text3);margin-bottom:10px}
+.lib-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.law-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .18s}
+.law-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.law-card.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-light)}
+.lc-top{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.lc-flag{font-size:1.2rem}
+.lc-country{font-size:13px;font-weight:600}
+.lc-title{font-size:14px;font-weight:600;margin-bottom:4px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lc-cat{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--radius-pill);background:var(--accent-light);color:var(--accent);font-weight:600;margin-bottom:4px}
+.lc-date{font-size:11px;color:var(--text3);margin-bottom:4px}
+.lc-summary{font-size:12px;color:var(--text2);line-height:1.45;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lc-footer{display:flex;align-items:center;justify-content:space-between}
+.lc-status{font-size:11px;padding:2px 8px;border-radius:var(--radius-pill);font-weight:600}
+.lc-status.effective{background:var(--green-bg);color:var(--green)}
+.lc-status.upcoming{background:var(--orange-bg);color:var(--orange)}
+.lc-status.active{background:var(--blue-bg);color:var(--blue)}
+.lc-status.action-required{background:var(--red-bg);color:var(--red)}
+.lc-link{font-size:12px;color:var(--accent);font-weight:600;cursor:pointer}
+.lc-link:hover{text-decoration:underline}
+.lib-empty{grid-column:1/-1;text-align:center;padding:30px;color:var(--text3);font-size:12px}
+
+.right{border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;background:var(--bg2)}
+.right-section{padding:14px;border-bottom:1px solid var(--border-light)}
+.right-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.kpi{text-align:center;padding:8px 4px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm)}
-.kpi-v{font-size:1.1rem;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.kpi-l{font-size:0.6rem;color:var(--text2);margin-top:2px}
-.progress{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:4px 0}
-.progress-bar{height:100%;border-radius:3px;transition:width .5s}
-.risk-label{display:flex;justify-content:space-between;font-size:0.65rem;color:var(--text2)}
-.ai-insight{padding:8px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;font-size:0.68rem;color:var(--text2);line-height:1.4;border-left:3px solid var(--accent)}
-.upcoming-item{padding:6px 0;border-bottom:1px solid var(--border);font-size:0.68rem}
+.kpi{text-align:center;padding:10px 4px;background:var(--surface);border-radius:var(--radius-sm)}
+.kpi-v{font-size:24px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.kpi-l{font-size:11px;color:var(--text3);margin-top:1px}
+.upcoming-item{padding:8px 0;border-bottom:1px solid var(--border-light);font-size:12px;transition:background .15s;cursor:pointer}
 .upcoming-item:last-child{border-bottom:none}
-.upcoming-date{font-size:0.6rem;color:var(--text3)}
-.ai-rec{padding:8px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;font-size:0.68rem;color:var(--text2);border-left:3px solid var(--accent3)}
+.upcoming-item:hover{background:var(--surface);border-radius:var(--radius-xs)}
+.upcoming-date{font-size:11px;color:var(--accent);font-weight:600;margin-bottom:2px}
+.upcoming-country{font-size:12px;font-weight:600}
+.upcoming-title{font-size:12px;color:var(--text2)}
+.ai-summary{padding:10px;background:var(--surface);border-radius:var(--radius-sm);font-size:12px;color:var(--text2);line-height:1.6;border-left:3px solid var(--accent)}
 
-/* ========== DRAWER ========== */
-.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.detail-overlay.open{opacity:1;pointer-events:all;display:flex}
+.detail-panel{display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);width:680px;max-width:92vw;max-height:85vh;overflow-y:auto;padding:24px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:210;box-shadow:var(--shadow-md)}
+.detail-panel.open{display:block}
+.detail-panel .dp-close{position:absolute;top:12px;right:14px;background:none;border:1px solid var(--border);color:var(--text2);width:28px;height:28px;border-radius:var(--radius-sm);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.detail-panel .dp-close:hover{border-color:var(--red);color:var(--red)}
+.dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.dp-section h4{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.dp-row{margin-bottom:8px}
+.dp-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.dp-val{font-size:12px;color:var(--text);line-height:1.5}
+.dp-val a{color:var(--accent);text-decoration:none}
+.dp-tag{display:inline-block;font-size:11px;padding:3px 8px;border-radius:var(--radius-pill);margin:2px 4px 2px 0}
+.dp-tag.mod{background:var(--accent-light);color:var(--accent);border:1px solid rgba(37,99,235,0.2)}
+
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(2px)}
 .drawer-overlay.open{opacity:1;pointer-events:all}
-.drawer{position:fixed;top:0;right:0;width:420px;max-width:90vw;height:100vh;background:var(--bg2);border-left:1px solid var(--border);z-index:210;transform:translateX(100%);transition:transform .3s;overflow-y:auto;padding:20px}
+.drawer{position:fixed;top:0;right:0;width:480px;max-width:90vw;height:100vh;background:var(--bg2);border-left:1px solid var(--border);z-index:210;transform:translateX(100%);transition:transform .25s;overflow-y:auto;padding:20px;box-shadow:var(--shadow-md)}
 .drawer.open{transform:translateX(0)}
-.drawer h2{font-size:0.95rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.drawer h2{font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .drawer .field{margin-bottom:10px}
-.drawer .field-label{font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:3px;letter-spacing:0.5px}
-.drawer .field-value{font-size:0.75rem;color:var(--text);line-height:1.5}
-.drawer-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text2);font-size:1rem;cursor:pointer}
+.drawer .field-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:3px;letter-spacing:.5px}
+.drawer .field-value{font-size:12px;color:var(--text);line-height:1.5}
+.drawer-close{position:absolute;top:14px;right:14px;background:none;border:1px solid var(--border);color:var(--text2);width:28px;height:28px;border-radius:var(--radius-sm);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.drawer-close:hover{border-color:var(--red);color:var(--red)}
 
-/* ========== SETTINGS ========== */
-.settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;display:flex;align-items:center;justify-content:center}
-.settings-overlay.open{opacity:1;pointer-events:all}
-.settings-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;width:400px;max-width:90vw}
-.settings-box h2{font-size:0.88rem;font-weight:700;margin-bottom:12px}
-.settings-box label{display:block;font-size:0.7rem;color:var(--text2);margin-bottom:4px}
-.settings-box input,.settings-box select{width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-size:0.75rem;margin-bottom:10px}
-.settings-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:12px}
+.btn-fullview{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;margin-top:12px;border-radius:var(--radius-sm);border:1px solid var(--accent);background:var(--accent-light);color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-fullview:hover{background:var(--accent);color:#fff}
 
-/* ========== TOAST ========== */
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--accent);color:#fff;padding:8px 18px;border-radius:20px;font-size:0.75rem;font-weight:600;opacity:0;transition:all .3s;z-index:999;pointer-events:none}
+.country-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px)}
+.country-modal.open{display:flex;flex-direction:column}
+.country-modal-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--card);border-bottom:1px solid var(--border)}
+.country-modal-bar h3{margin:0;font-size:14px;display:flex;align-items:center;gap:8px}
+.country-modal-close{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 16px;cursor:pointer;font-size:12px;color:var(--text);transition:all .15s}
+.country-modal-close:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.country-modal iframe{flex:1;border:none;width:100%}
+
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--accent);color:#fff;padding:8px 18px;border-radius:var(--radius-pill);font-size:12px;font-weight:600;opacity:0;transition:all .3s;z-index:999;pointer-events:none}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ========== SCROLLBAR ========== */
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 
-/* ========== BILINGUAL ========== */
-.bi-toggle{display:flex;gap:2px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px;margin:0 12px 8px}
-.bi-btn{padding:3px 8px;border-radius:4px;font-size:0.62rem;cursor:pointer;color:var(--text2);transition:all .15s;border:none;background:none}
-.bi-btn.active{background:var(--accent);color:#fff}
-
-/* ===== UI SCALE-UP OVERRIDE — appended only, zero logic changes ===== */
-:root{--header-h:56px;--left-w:300px;--right-w:340px;--radius:12px;--radius-sm:8px}
-body{font-size:17px;line-height:1.72}
-.header{height:var(--header-h);padding:0 28px}
-.header-logo{font-size:1.18rem}
-.hbtn{padding:8px 18px;font-size:0.92rem;border-radius:var(--radius-sm)}
-.theme-toggle{width:38px;height:38px;font-size:1.05rem}
-.dd-menu div{padding:11px 18px;font-size:0.92rem}
-.notif-header h3{font-size:1.05rem}
-.notif-group-label{font-size:0.82rem;padding:10px 20px}
-.notif-item{padding:14px 20px}
-.notif-item .ni-flag{font-size:1.3rem}
-.notif-item .ni-title{font-size:0.92rem}
-.notif-item .ni-sub{font-size:0.82rem}
-.notif-item .ni-date{font-size:0.76rem}
-.left-search{padding:14px 16px}
-.sinput{padding:11px 14px;font-size:0.98rem;border-radius:var(--radius-sm)}
-.sinput::placeholder{font-size:0.98rem}
-.left-filters{padding:10px 16px;gap:8px}
-.fsel{padding:9px 12px;font-size:0.9rem;border-radius:var(--radius-sm);min-height:40px}
-.left-tree{padding:8px 0}
-.tree-label{padding:7px 14px;font-size:0.88rem;gap:8px}
-.tree-arrow{font-size:0.65rem;width:14px}
-.tree-sub li{padding:6px 14px;font-size:0.82rem;margin:2px 10px}
-.tree-sub-item{padding:6px 14px 6px 28px;font-size:0.78rem;margin:2px 10px}
-.left-globe{padding:10px 16px}
-.globe-info{font-size:0.8rem;margin-bottom:8px}
-.map-shell{height:290px;border-radius:var(--radius)}
-.leaflet-control-zoom a{width:30px!important;height:30px!important;line-height:30px!important;font-size:16px!important}
-.map-return-btn{padding:7px 16px;font-size:0.82rem}
-.map-chip .mc-name{font-size:0.9rem}
-.map-chip .mc-count{font-size:0.76rem}
-.globe-legend{gap:6px;margin-top:8px}
-.gleg{font-size:0.76rem;padding:3px 9px}
-.gdot{width:8px;height:8px}
-.leaflet-tooltip.map-tip{font-size:0.86rem!important;padding:5px 12px!important}
-.hero-chips{gap:8px;margin-bottom:12px}
-.chip{padding:7px 18px;border-radius:14px;font-size:0.88rem}
-.center-top{padding:18px 26px 14px}
-.center-bottom{padding:18px 26px}
-.section-header{margin-bottom:14px}
-.section-title{font-size:1.12rem;gap:8px}
-.section-sub{font-size:0.88rem;margin-top:3px}
-.lib-count{font-size:0.84rem;margin-bottom:12px}
-.lib-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
-.law-card{padding:20px;border-radius:14px}
-.law-card:hover{box-shadow:0 8px 28px rgba(0,0,0,.3);transform:translateY(-3px)}
-.lc-top{gap:10px;margin-bottom:10px}
-.lc-flag{font-size:1.5rem}
-.lc-country{font-size:0.92rem;font-weight:700}
-.lc-badge{font-size:0.75rem;padding:3px 10px;border-radius:10px}
-.lc-title{font-size:1.05rem;font-weight:800;margin-bottom:7px;line-height:1.45}
-.lc-meta{gap:10px;margin-bottom:9px;font-size:0.79rem}
-.lc-summary{font-size:0.9rem;line-height:1.72;margin-bottom:13px}
-.lc-cat{font-size:0.77rem;padding:3px 10px;border-radius:10px}
-.lc-status{font-size:0.72rem;padding:3px 10px}
-.lc-link{font-size:0.86rem}
-.lib-empty{padding:50px;font-size:0.96rem}
-.tl-card{padding:14px 18px;margin-bottom:10px;border-radius:var(--radius)}
-.tl-top{gap:8px;margin-bottom:6px}
-.tl-flag{font-size:1.1rem}
-.tl-country{font-size:0.92rem}
-.tl-date{font-size:0.79rem}
-.tl-law{font-size:0.98rem;margin-bottom:5px}
-.tl-article{font-size:0.83rem;margin-bottom:6px}
-.tl-summary{font-size:0.9rem;line-height:1.66;margin-bottom:10px}
-.tl-tag{font-size:0.76rem;padding:3px 10px}
-.tl-detail{padding:14px 16px;font-size:0.86rem}
-.tl-detail h4{font-size:0.92rem;margin-bottom:8px}
-.tl-detail p{line-height:1.72;margin-bottom:8px}
-.tl-year{font-size:0.92rem;gap:10px}
-.tl-month{font-size:0.79rem}
-.detail-panel{width:780px;padding:32px;border-radius:var(--radius)}
-.dp-grid{gap:24px}
-.dp-section h4{font-size:0.92rem;margin-bottom:10px}
-.dp-label{font-size:0.79rem;margin-bottom:3px}
-.dp-val{font-size:0.94rem;line-height:1.72}
-.dp-tag{font-size:0.79rem;padding:4px 12px}
-.dp-check{font-size:0.9rem;margin-bottom:8px}
-.ai-section-title{font-size:0.92rem;margin-bottom:10px}
-.right{padding:16px}
-.right h4{font-size:0.96rem;margin-bottom:12px}
-.rcard{padding:14px;margin-bottom:14px}
-.kpi-v{font-size:1.38rem}
-.kpi-l{font-size:0.79rem}
-.progress{height:8px;margin:6px 0}
-.risk-label{font-size:0.83rem}
-.ai-insight{padding:13px;font-size:0.87rem;line-height:1.62;margin-bottom:10px}
-.upcoming-item{padding:8px 0;font-size:0.87rem}
-.upcoming-date{font-size:0.79rem}
-.ai-rec{padding:13px;font-size:0.87rem;margin-bottom:10px}
-.drawer{width:520px;padding:28px}
-.drawer h2{font-size:1.12rem;margin-bottom:16px}
-.drawer .field{margin-bottom:14px}
-.drawer .field-label{font-size:0.81rem;margin-bottom:4px}
-.drawer .field-value{font-size:0.94rem;line-height:1.72}
-.settings-box{width:480px;padding:28px}
-.settings-box h2{font-size:1.06rem;margin-bottom:16px}
-.settings-box label{font-size:0.9rem;margin-bottom:6px}
-.settings-box input,.settings-box select{padding:10px 14px;font-size:0.94rem;margin-bottom:14px}
-#toast{padding:10px 24px;font-size:0.94rem;border-radius:24px}
-.bi-toggle{gap:4px;padding:3px;margin:0 16px 12px}
-.bi-btn{padding:5px 14px;font-size:0.84rem}
-@media(max-width:1440px){:root{--left-w:270px;--right-w:300px}.lib-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}.law-card{padding:16px}.lc-title{font-size:0.98rem}.lc-summary{font-size:0.85rem}.map-shell{height:260px}.detail-panel{width:680px;padding:28px}}
-@media(min-width:1920px){:root{--left-w:320px;--right-w:360px}.lib-grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}.map-shell{height:320px}}
-.country-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px)}
-.country-modal.open{display:flex;flex-direction:column}
-.country-modal-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--card);border-bottom:1px solid var(--border)}
-.country-modal-bar h3{margin:0;font-size:0.95rem;display:flex;align-items:center;gap:8px}
-.country-modal-close{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 16px;cursor:pointer;font-size:0.85rem;color:var(--text1);transition:all 0.2s}
-.country-modal-close:hover{background:var(--high);color:#fff;border-color:var(--high)}
-.country-modal iframe{flex:1;border:none;width:100%}
-.btn-fullview{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;margin-top:12px;border-radius:10px;border:1px solid var(--accent);background:rgba(99,102,241,0.08);color:var(--accent);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s}
-.btn-fullview:hover{background:var(--accent);color:#fff}
-
-/* ========== LATEST UPDATES TICKER ========== */
-.latest-ticker{width:100%;background:var(--bg2);border-bottom:1px solid var(--border);overflow:hidden;flex-shrink:0}
-.latest-ticker-inner{display:flex;align-items:center;max-width:100%}
-.latest-ticker-label{flex-shrink:0;padding:12px 20px;font-size:0.78rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:8px;white-space:nowrap;background:var(--bg2);z-index:2}
-.latest-ticker-label .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
-.latest-ticker-track-wrap{flex:1;overflow:hidden;position:relative;mask-image:linear-gradient(to right,transparent 0%,#000 3%,#000 92%,transparent 100%);-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 3%,#000 92%,transparent 100%)}
-.latest-ticker-track{display:flex;align-items:center;gap:0;width:max-content}
-.latest-ticker-track.auto{animation:tickerScroll 80s linear infinite}
-.latest-ticker-track:hover,.latest-ticker-track-wrap:hover .latest-ticker-track{animation-play-state:paused!important}
-@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.ticker-card{flex-shrink:0;display:flex;align-items:center;gap:12px;padding:10px 22px;cursor:pointer;transition:background .2s;white-space:nowrap;position:relative;border-radius:20px;margin:6px 4px;background:transparent}
-.ticker-card:hover{background:var(--card-hover)}
-.ticker-card:active{background:var(--card)}
-.tc-flag{font-size:1.15rem;flex-shrink:0}
-.tc-info{display:flex;align-items:center;gap:8px}
-.tc-country{font-size:0.78rem;font-weight:700;color:var(--text)}
-.tc-sep{color:var(--text3);font-size:0.65rem}
-.tc-cat{font-size:0.68rem;color:var(--accent);font-weight:500}
-.tc-title{font-size:0.78rem;color:var(--text2);font-weight:500}
-.tc-date{font-size:0.68rem;color:var(--text3);flex-shrink:0;margin-left:4px}
-.tc-new{font-size:0.55rem;font-weight:700;color:#fff;background:var(--accent);padding:2px 7px;border-radius:8px;flex-shrink:0;line-height:1.3;margin-left:2px}
-.ticker-viewall{flex-shrink:0;padding:10px 24px;font-size:0.78rem;font-weight:600;color:var(--accent);cursor:pointer;white-space:nowrap;transition:color .2s;display:flex;align-items:center;gap:5px;border-radius:20px;margin:6px 8px}
-.ticker-viewall:hover{color:var(--text);background:var(--card-hover)}
-@media(max-width:768px){.latest-ticker-label{padding:10px 14px;font-size:0.7rem}.ticker-card{padding:8px 14px;gap:8px}.tc-country,.tc-cat,.tc-title,.tc-date{font-size:0.68rem}.tc-title{max-width:120px;overflow:hidden;text-overflow:ellipsis}}
+@media(max-width:1200px){.main{grid-template-columns:1fr}.left{display:none}.right{display:none}.lib-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.lib-grid{grid-template-columns:1fr}.hero-section{padding:16px}.timeline-section,.library-section{padding:12px 16px}}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="header">
-  <div class="header-logo" data-i18n="title">🌐 全球劳动法汇总系统 v3.0</div>
+  <div class="header-left">
+    <div class="header-title"><span class="g1">🌐 Global Labor Law Intelligence</span></div>
+    <div class="header-subtitle">全球劳动法规智能监控系统 · v3.0</div>
+  </div>
   <div class="header-actions">
     <div class="dd-wrap">
       <button class="hbtn" onclick="toggleDD('langDD')" id="langBtn">🌐 中文</button>
@@ -413,22 +278,20 @@ body{font-size:17px;line-height:1.72}
         <div onclick="switchLang('es')">🇪🇸 Español</div>
       </div>
     </div>
-    <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
-    <button class="hbtn" onclick="toggleNotifPanel()" style="position:relative">🔔<span id="notifBadge" style="position:absolute;top:-5px;right:-5px;background:var(--high);color:#fff;border-radius:50%;width:15px;height:15px;font-size:0.55rem;display:flex;align-items:center;justify-content:center;font-weight:700">3</span></button>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">☀️</button>
+    <button class="notif-btn" onclick="toggleNotifPanel()">🔔<span class="notif-badge" id="notifBadge">3</span></button>
   </div>
 </header>
 
-<!-- LATEST REGULATION TICKER -->
 <div class="latest-ticker">
-  <div class="latest-ticker-inner">
-    <div class="latest-ticker-label"><span class="dot"></span>Latest Updates</div>
-    <div class="latest-ticker-track-wrap">
-      <div class="latest-ticker-track" id="tickerTrack"></div>
+  <div class="ticker-inner">
+    <div class="ticker-label"><span class="dot"></span>Latest Updates</div>
+    <div class="ticker-wrap">
+      <div class="ticker-track" id="tickerTrack"></div>
     </div>
   </div>
 </div>
 
-<!-- NOTIFICATION PANEL -->
 <div class="notif-panel" id="notifPanel">
   <div class="notif-header">
     <h3>🔔 <span data-i18n="notifications">通知中心</span></h3>
@@ -437,47 +300,50 @@ body{font-size:17px;line-height:1.72}
   <div class="notif-body" id="notifBody"></div>
 </div>
 
-<!-- MAIN 3-COL LAYOUT -->
 <div class="main">
-  <!-- LEFT -->
   <div class="left">
-    <div class="left-search">
-      <input class="sinput" id="searchInput" data-i18n-ph="searchPlaceholder" placeholder="搜索法规..." oninput="applyFilters()">
+    <div class="panel-section">
+      <div class="panel-label">FILTERS</div>
+      <div class="filter-row">
+        <label data-i18n="countryRegion">Country / Region</label>
+        <select class="filter-select" id="filterRegion" onchange="applyFilters()">
+          <option value="" data-i18n="all">全部</option>
+          <option value="Asia">亚洲</option><option value="Europe">欧洲</option><option value="Americas">美洲</option>
+          <option value="Africa">非洲</option><option value="Oceania">大洋洲</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <select class="filter-select" id="filterCountry" onchange="onCountrySelectChange()"><option value="" data-i18n="all">全部</option></select>
+      </div>
+      <div class="filter-row">
+        <label data-i18n="regulationType">Regulation Type</label>
+        <select class="filter-select" id="filterBiz" onchange="onBizChange()">
+          <option value="" data-i18n="all">全部</option>
+          <option value="Working Time">Working Time</option>
+          <option value="Minimum Wage">Minimum Wage</option>
+          <option value="Employee Rights">Employee Rights</option>
+          <option value="Employee Benefits">Employee Benefits</option>
+          <option value="Social Insurance">Social Insurance</option>
+          <option value="Data Privacy">Data Privacy</option>
+          <option value="Workplace Safety">Workplace Safety</option>
+          <option value="Anti-Discrimination">Anti-Discrimination</option>
+          <option value="Compliance">Compliance</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <label data-i18n="updated">Updated</label>
+        <select class="filter-select" id="sortBy" onchange="applyFilters()">
+          <option value="date" data-i18n="sortDate">按更新日期</option>
+          <option value="country" data-i18n="sortCountry">按国家</option>
+        </select>
+      </div>
+      <button class="reset-btn" onclick="resetFilters()" data-i18n="resetFilters">Reset filters</button>
     </div>
-    <div class="left-filters">
-      <select class="fsel" id="filterRegion" onchange="applyFilters()">
-        <option value="" data-i18n="all">全部</option>
-        <option value="Asia">亚洲</option><option value="Europe">欧洲</option><option value="Americas">美洲</option>
-        <option value="Africa">非洲</option><option value="Oceania">大洋洲</option>
-      </select>
-      <select class="fsel" id="filterCountry" onchange="onCountrySelectChange()"><option value="" data-i18n="all">全部</option></select>
-      <select class="fsel" id="filterBiz" onchange="onBizChange()" title="业务节点">
-        <option value="">业务节点·全部</option>
-        <option value="招聘">招聘（TBD）</option>
-        <option value="员工关系">员工关系（TBD）</option>
-        <option value="薪酬管理">薪酬管理</option>
-        <option value="培训发展">培训发展（TBD）</option>
-      </select>
-      <select class="fsel" id="filterBizSub" onchange="applyFilters()" title="薪酬管理二级节点" style="display:none">
-        <option value="">薪酬·全部</option>
-        <option value="法定缴费类">法定缴费类</option>
-        <option value="休假类">休假类</option>
-        <option value="强制支付">强制支付</option>
-        <option value="工时与加班">工时与加班</option>
-        <option value="离职与遣散">离职与遣散</option>
-        <option value="个税">个税</option>
-      </select>
-      <select class="fsel" id="sortBy" onchange="applyFilters()">
-        <option value="date" data-i18n="sortDate">按更新日期</option>
-        <option value="country" data-i18n="sortCountry">按国家</option>
-      </select>
-    </div>
-    <div class="left-tree" id="treeMenu"></div>
-    <div class="left-globe">
-      <div class="globe-info" data-i18n="globeInfo">🗺️ 点击国家放大 · 滚轮缩放 · 返回世界视图</div>
+    <div class="map-section">
+      <div class="map-info">🗺️ <span data-i18n="globeInfo">点击国家放大 · 滚轮缩放 · 返回世界视图</span></div>
       <div class="map-shell">
         <div id="leafletMap"></div>
-        <button class="map-return-btn" id="mapReturnBtn" onclick="returnToWorldView()"><span>←</span><span data-i18n="backToWorld">返回世界视图</span></button>
+        <button class="map-return-btn" id="mapReturnBtn" onclick="returnToWorldView()">← <span data-i18n="backToWorld">返回世界视图</span></button>
         <div class="map-chip" id="mapChip">
           <div class="mc-name" id="mcName">-</div>
           <div class="mc-count" id="mcCount">0</div>
@@ -487,1006 +353,372 @@ body{font-size:17px;line-height:1.72}
     </div>
   </div>
 
-  <!-- CENTER -->
   <div class="center">
-    <div class="center-split">
-      <!-- TOP: Recent Updates (Last 3 Years) -->
-      <div class="center-top" id="timelinePanel">
-        <div class="section-header">
-          <div class="section-title"><span class="ai-dot"></span><span data-i18n="heroTitle">AI Employment Law Monitor</span></div>
-          <div class="section-sub" data-i18n="heroSub">Recent employment law updates in the last 3 years</div>
+    <div class="center-scroll">
+      <div class="hero-section">
+        <div class="hero-tag">AI REGULATORY INTELLIGENCE</div>
+        <div class="hero-title" data-i18n="heroTitle">全球劳动法规智能监控</div>
+        <div class="hero-sub">
+          <span>Monitor · Compare · Analyze global HR regulations</span>
+          <span class="hero-badge"><span class="dot"></span> AI Monitoring Active</span>
         </div>
-        <div class="hero-chips" id="heroChips"></div>
+        <input class="hero-search" id="searchInput" data-i18n-ph="searchPlaceholder" placeholder="🔍 Search regulations, countries or HR topics..." oninput="applyFilters()">
+        <div class="hero-tabs" id="heroChips"></div>
+      </div>
+
+      <div class="timeline-section">
+        <div class="section-title-label" id="timelineLabel">── REGULATORY TIMELINE ──</div>
         <div id="timeline"></div>
       </div>
-      <!-- BOTTOM: Law Library (All Laws) -->
-      <div class="center-bottom" id="libraryPanel">
-        <div class="section-header">
-          <div class="section-title"><span class="lib-dot"></span>📚 <span data-i18n="libTitle">Employment Law Library</span></div>
-          <div class="section-sub" id="libSub" data-i18n="libSub">All employment laws for the selected country</div>
+
+      <div class="library-section">
+        <div class="section-title-label" id="libraryLabel" style="justify-content:flex-start;gap:8px">
+          ── REGULATION LIBRARY ── <span id="libCount" style="font-weight:400;color:var(--text3)"></span>
         </div>
-        <div class="lib-count" id="libCount"></div>
         <div class="lib-grid" id="lawCards"></div>
       </div>
     </div>
   </div>
 
-  <!-- RIGHT -->
   <div class="right">
-    <h4><span class="dot"></span><span data-i18n="kpiTitle">关键指标</span></h4>
-    <div class="kpi-grid">
-      <div class="kpi"><div class="kpi-v" id="kTotal">0</div><div class="kpi-l" data-i18n="法规总数">法规总数</div></div>
-      <div class="kpi"><div class="kpi-v" id="kCountries">0</div><div class="kpi-l" data-i18n="覆盖国家">覆盖国家</div></div>
-      <div class="kpi"><div class="kpi-v" id="kCats">7</div><div class="kpi-l" data-i18n="法规类别">法规类别</div></div>
-      <div class="kpi"><div class="kpi-v" id="kUpdated">-</div><div class="kpi-l" data-i18n="最后更新">最后更新</div></div>
+    <div class="right-section">
+      <div class="right-label" id="insightsLabel">📊 REGULATORY INSIGHTS</div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-v" id="kTotal">0</div><div class="kpi-l">Active Regulations</div></div>
+        <div class="kpi"><div class="kpi-v" id="kCountries">0</div><div class="kpi-l">Countries Covered</div></div>
+        <div class="kpi"><div class="kpi-v" id="kUpdated30">0</div><div class="kpi-l">Updated (30 days)</div></div>
+        <div class="kpi"><div class="kpi-v" id="kAction">0</div><div class="kpi-l">Action Required</div></div>
+      </div>
     </div>
-
-    <h4><span class="dot"></span>📅 <span data-i18n="upcomingDates">即将生效</span></h4>
-    <div id="upcomingList"></div>
+    <div class="right-section">
+      <div class="right-label" id="upcomingLabel">📅 UPCOMING EFFECTIVE DATES</div>
+      <div id="upcomingList"></div>
+    </div>
+    <div class="right-section">
+      <div class="right-label" id="aiLabel">🤖 AI IMPACT SUMMARY</div>
+      <div class="ai-summary" id="aiSummary"></div>
+    </div>
   </div>
 </div>
 
-<!-- LAW DETAIL DRAWER -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
   <button class="drawer-close" onclick="closeDrawer()">✕</button>
   <div id="drawerContent"></div>
 </div>
 
-<!-- LAW DETAIL OVERLAY -->
 <div class="detail-overlay" id="detailOverlay" onclick="closeDetail()"></div>
 <div class="detail-panel" id="detailPanel">
   <button class="dp-close" onclick="closeDetail()">✕</button>
   <div id="detailContent"></div>
 </div>
 
-<!-- SETTINGS -->
-<div class="settings-overlay" id="settingsOverlay">
-  <div class="settings-box">
-    <h2>⚙️ <span data-i18n="settings">设置</span></h2>
-    <label data-i18n="deepseekKey">DeepSeek API Key</label>
-    <input id="apiKeyInput" type="password" placeholder="sk-...">
-    <label data-i18n="langLabel">界面语言</label>
-    <select id="settingsLang"><option value="zh">中文</option><option value="en">English</option><option value="es">Español</option></select>
-    <div class="settings-actions">
-      <button class="hbtn" onclick="closeSettings()" data-i18n="cancel">取消</button>
-      <button class="hbtn active" onclick="saveSettings()" data-i18n="save">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div id="toast"></div>
-
-<!-- GLOBE TOOLTIP -->
-
-
-<script>
-// ============ I18N ============
-let currentLang = localStorage.getItem('hr_lang') || 'zh';
-const i18n = {
-  zh: {
-    title:'🌐 全球劳动法汇总系统 v3.0', searchPlaceholder:'搜索法规...', all:'全部', sortDate:'按更新日期', sortCountry:'按国家',
-    heroTitle:'🤖 AI 智能劳动法监控', heroSub:'近 3 年各国/地区劳动法更新动态',
-    kpiTitle:'关键指标', 法规总数:'法规总数', 覆盖国家:'覆盖国家', 法规类别:'法规类别', 最后更新:'最后更新',
-    complianceRisk:'合规风险评估', overallScore:'总体风险分数', riskNote:'基于最近法规变化评估',
-    aiInsights:'AI 洞察', aiInsight1:'本周有 3 个国家更新了劳动法规，建议重点关注新加坡和泰国的变化。',
-    aiInsight2:'马来西亚 EPF 缴费比例调整将于下月生效，需更新薪酬计算。',
-    upcomingDates:'即将生效', aiRecommendations:'AI 建议',
-    aiRec1:'审查所有受影响国家的工资计算系统，确保合规。', aiRec2:'更新员工手册中关于休假政策的条款。',
-    notifications:'通知中心', close:'关闭', profile:'个人资料', settings:'设置', logout:'退出登录', save:'保存', cancel:'取消',
-    deepseekKey:'DeepSeek API Key', langLabel:'界面语言',
-    globeInfo:'🗺️ 点击国家放大 · 滚轮缩放 · 返回世界视图', laws:'条法规', backToWorld:'返回世界视图',
-    招聘管理:'招聘管理', 员工关系:'员工关系', 薪酬管理:'薪酬管理', 全部:'全部',
-    法定缴费类:'法定缴费类', 休假类:'休假类', 强制支付:'强制支付', 工时与加班:'工时与加班',
-    离职与遣散:'离职与遣散', 个税:'个税', 培训发展:'培训发展',
-    年假:'年假', 病假:'病假', 产假:'产假', 赔偿金:'赔偿金', 育儿假:'育儿假', 丧假:'丧假', 婚假:'婚假', 其他假期:'其他假期',
-    社保规定:'社保规定', 工作时间:'工作时间', 入职离职:'入职离职', 离职结算:'离职结算', 劳动合同:'劳动合同', 工资:'工资',
-    today:'今天', yesterday:'昨天', thisWeek:'本周', earlier:'更早', selectLaw:'← 从上方列表选择一条法规查看详情', libTitle:'📚 就业法规库', libSub:'所选国家/地区的全部就业法规',
-    viewDetails:'查看详情', effective:'生效', published:'发布', impact:'影响', modules:'受影响模块',
-    aiSummary:'AI 摘要', aiRecommendation:'AI 建议', officialSource:'官方来源', article:'条款',
-    原文:'原文', 中文翻译:'中文翻译', 变更历史:'变更历史', 查看官方:'查看官方',
-    en:{}, es:{}
-  },
-  en: {
-    title:'🌐 Global Labor Law System v3.0', searchPlaceholder:'Search laws...', all:'All', sortDate:'By Date', sortCountry:'By Country',
-    heroTitle:'🤖 AI Employment Law Monitor', heroSub:'Recent employment law updates in the last 3 years', libSub:'All employment laws for the selected country',
-    kpiTitle:'Key Metrics', 法规总数:'Total Laws', 覆盖国家:'Countries', 法规类别:'Categories', 最后更新:'Last Updated',
-    complianceRisk:'Compliance Risk', overallScore:'Overall Score', riskNote:'Based on recent regulatory changes',
-    aiInsights:'AI Insights', aiInsight1:'3 countries updated labor laws this week. Focus on Singapore and Thailand.',
-    aiInsight2:'Malaysia EPF contribution adjustment takes effect next month — update payroll.',
-    upcomingDates:'Upcoming', aiRecommendations:'AI Recommendations',
-    aiRec1:'Review wage calculation systems in all affected countries.', aiRec2:'Update employee handbook leave policies.',
-    notifications:'Notifications', close:'Close', profile:'Profile', settings:'Settings', logout:'Log Out', save:'Save', cancel:'Cancel',
-    deepseekKey:'DeepSeek API Key', langLabel:'Language',
-    globeInfo:'🗺️ Click a country to zoom · Scroll · Back to world', laws:'laws', backToWorld:'Back to world',
-    招聘管理:'Recruitment', 员工关系:'Employee Relations', 薪酬管理:'Compensation', 全部:'All',
-    法定缴费类:'Contributions', 休假类:'Leave', 强制支付:'Mandatory', 工时与加班:'Hours & OT',
-    离职与遣散:'Termination', 个税:'Income Tax', 培训发展:'Training',
-    年假:'Annual', 病假:'Sick', 产假:'Maternity', 赔偿金:'Severance', 育儿假:'Childcare', 丧假:'Bereavement', 婚假:'Marriage', 其他假期:'Other',
-    社保规定:'Social Security', 工作时间:'Working Hours', 入职离职:'Hiring & Exit', 离职结算:'Exit Settlement', 劳动合同:'Contract', 工资:'Wages',
-    today:'Today', yesterday:'Yesterday', thisWeek:'This Week', earlier:'Earlier', selectLaw:'← Select a regulation from the list above', libTitle:'📚 Employment Law Library',
-    viewDetails:'View Details', effective:'Effective', published:'Published', impact:'Impact', modules:'Modules',
-    aiSummary:'AI Summary', aiRecommendation:'AI Recommendation', officialSource:'Official Source', article:'Article',
-    原文:'Original', 中文翻译:'Translation', 变更历史:'History', 查看官方:'Official',
-    zh:{}, es:{}
-  },
-  es: {
-    title:'🌐 Sistema de Leyes Laborales v3.0', searchPlaceholder:'Buscar leyes...', all:'Todos', sortDate:'Por fecha', sortCountry:'Por país',
-    heroTitle:'🤖 Monitor de Leyes Laborales IA', heroSub:'Actualizaciones recientes de leyes laborales en los últimos 3 años', libSub:'Todas las leyes laborales del país seleccionado',
-    kpiTitle:'Métricas Clave', 法规总数:'Total Leyes', 覆盖国家:'Países', 法规类别:'Categorías', 最后更新:'Actualizado',
-    complianceRisk:'Riesgo de Cumplimiento', overallScore:'Puntuación General', riskNote:'Basado en cambios regulatorios recientes',
-    aiInsights:'Insights IA', aiInsight1:'3 países actualizaron leyes laborales esta semana.',
-    aiInsight2:'Ajuste EPF de Malasia entra en vigor el próximo mes.',
-    upcomingDates:'Próximos', aiRecommendations:'Recomendaciones IA',
-    aiRec1:'Revisar sistemas de cálculo salarial.', aiRec2:'Actualizar políticas de permisos.',
-    notifications:'Notificaciones', close:'Cerrar', profile:'Perfil', settings:'Configuración', logout:'Salir', save:'Guardar', cancel:'Cancelar',
-    deepseekKey:'Clave API DeepSeek', langLabel:'Idioma',
-    globeInfo:'🗺️ Clic en un país para ampliar · Zoom · Volver al mundo', laws:'leyes', backToWorld:'Volver al mundo',
-    招聘管理:'Reclutamiento', 员工关系:'Relaciones', 薪酬管理:'Compensación', 全部:'Todos',
-    法定缴费类:'Contribuciones', 休假类:'Permisos', 强制支付:'Mandatorio', 工时与加班:'Horas',
-    离职与遣散:'Terminación', 个税:'Impuestos', 培训发展:'Capacitación',
-    年假:'Anual', 病假:'Enfermedad', 产假:'Maternidad', 赔偿金:'Indemnización', 育儿假:'Parental', 丧假:'Duelo', 婚假:'Boda', 其他假期:'Otros',
-    社保规定:'Seg. Social', 工作时间:'Jornada', 入职离职:'Altas/Bajas', 离职结算:'Liquidación', 劳动合同:'Contrato', 工资:'Salario',
-    today:'Hoy', yesterday:'Ayer', thisWeek:'Esta semana', earlier:'Anterior', selectLaw:'← Seleccione una regulación de la lista', libTitle:'📚 Biblioteca de Leyes Laborales',
-    viewDetails:'Ver detalles', effective:'Vigente', published:'Publicado', impact:'Impacto', modules:'Módulos',
-    aiSummary:'Resumen IA', aiRecommendation:'Recomendación IA', officialSource:'Fuente oficial', article:'Artículo',
-    原文:'Original', 中文翻译:'Traducción', 变更历史:'Historial', 查看官方:'Oficial',
-    zh:{}, en:{}
-  }
-};
-function t(key) { const d = i18n[currentLang] || i18n.zh; return d[key] || i18n.zh[key] || key; }
-
-// ============ DROPDOWN / THEME / LANG ============
-function toggleDD(id) {
-  document.querySelectorAll('.dd-menu').forEach(m => { if(m.id !== id) m.classList.remove('open'); });
-  document.getElementById(id).classList.toggle('open');
-}
-document.addEventListener('click', e => { if(!e.target.closest('.dd-wrap')) document.querySelectorAll('.dd-menu').forEach(m=>m.classList.remove('open')); });
-
-function getTheme(){ return localStorage.getItem('hr_theme') || 'dark'; }
-function setTheme(t){ document.documentElement.setAttribute('data-theme',t); localStorage.setItem('hr_theme',t); document.getElementById('themeBtn').textContent = t==='dark'?'☀️':'🌙'; }
-function toggleTheme(){ setTheme(getTheme()==='dark'?'light':'dark'); if(typeof refreshMapTiles==='function') refreshMapTiles(); }
-setTheme(getTheme());
-
-function switchLang(lang){
-  currentLang = lang;
-  localStorage.setItem('hr_lang', lang);
-  document.getElementById('langBtn').textContent = {zh:'🌐 中文',en:'🌐 English',es:'🌐 Español'}[lang];
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const k = el.getAttribute('data-i18n');
-    el.textContent = t(k);
-  });
-  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-    el.placeholder = t(el.getAttribute('data-i18n-ph'));
-  });
-  document.getElementById('settingsLang').value = lang;
-  applyFilters(); renderTimeline(); renderNotifications(); renderTree(); renderRightPanel(); renderHeroChips();
-  document.querySelectorAll('.dd-menu').forEach(m=>m.classList.remove('open'));
-}
-// Init lang
-document.getElementById('langBtn').textContent = {zh:'🌐 中文',en:'🌐 English',es:'🌐 Español'}[currentLang];
-document.getElementById('settingsLang').value = currentLang;
-// Apply i18n on page load
-setTimeout(() => switchLang(currentLang), 0);
-
-// ============ DATA ============
-const laborLawData = [
-  {id:"sg_001",country:"Singapore",countryCode:"SG",flag:"🇸🇬",region:"Asia",lawName:"Employment Act",article:"Part IV, S38",category:"工作时间",importance:"high",originalText:"Maximum working hours: 8h/day, 44h/week.",chineseTranslation:"最长工作时间：每天8小时，每周44小时。",lastUpdated:"2025-06-01",effectiveDate:"2025-06-01",history:[{date:"2024-04-01",change:"引入4天工作周试点"},{date:"2023-01-01",change:"调整加班费率"},{date:"2022-04-01",change:"扩大覆盖范围"}],officialUrl:"https://sso.agc.gov.sg"},
-  {id:"sg_002",country:"Singapore",countryCode:"SG",flag:"🇸🇬",region:"Asia",lawName:"Employment Act",article:"Part IX, S88",category:"休假",importance:"medium",originalText:"Paid sick leave: 14 days outpatient + 60 days hospitalization.",chineseTranslation:"带薪病假：14天门诊 + 60天住院。",lastUpdated:"2025-05-15",effectiveDate:"2025-06-01",history:[{date:"2024-01-01",change:"增加心理健康病假"}],officialUrl:"https://sso.agc.gov.sg"},
-  {id:"sg_003",country:"Singapore",countryCode:"SG",flag:"🇸🇬",region:"Asia",lawName:"Central Provident Fund Act",article:"S27",category:"社保规定",importance:"high",originalText:"Employee CPF: 20%, Employer CPF: 17%.",chineseTranslation:"员工CPF缴费：20%，雇主CPF缴费：17%。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2024-01-01",change:"上调缴费比例"},{date:"2023-01-01",change:"调整分配比例"}],officialUrl:"https://www.cpf.gov.sg"},
-  {id:"my_001",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"Employment Act 1955",article:"S60A",category:"工作时间",importance:"high",originalText:"Normal hours: 8h/day, 45h/week. OT rate: 1.5x.",chineseTranslation:"正常工时：每天8小时，每周45小时。加班费率：1.5倍。",lastUpdated:"2025-07-01",effectiveDate:"2025-07-01",history:[{date:"2025-01-01",change:"每周工时从45降至40小时"},{date:"2023-01-01",change:"扩大EA覆盖范围"}],officialUrl:"https://www.dosh.gov.my"},
-  {id:"my_002",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"EPF Act 1991",article:"S43",category:"社保规定",importance:"high",originalText:"EPF contribution: Employee 11%, Employer varies (12-19%).",chineseTranslation:"EPF缴费：员工11%，雇主12-19%。",lastUpdated:"2025-06-15",effectiveDate:"2025-07-01",history:[{date:"2024-01-01",change:"调整雇主缴费率"}],officialUrl:"https://www.kwsp.gov.my"},
-  {id:"my_003",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"Employment Act 1955",article:"S60",category:"休假",importance:"medium",originalText:"Annual leave: 8-16 days based on service years.",chineseTranslation:"年假：根据工龄8-16天。",lastUpdated:"2025-03-01",effectiveDate:"2025-03-01",history:[{date:"2023-01-01",change:"增加陪产假至7天"}],officialUrl:"https://www.dosh.gov.my"},
-  // ===== 以下为飞书《马来西亚 Malaysia for AI》文档数据（按业务节点归类）=====
-  // 法定缴费类 Social Security / Statutory Funds
-  {id:"my_epf",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"EPF 公积金（养老保险）",article:"EPF Act 1991",category:"社保规定",subcategory:"法定缴费类",importance:"high",originalText:"EPF (Pension). Employer: local monthly wage≤RM5,000→13%, >RM5,000→12%, expat 2%; Employee: local 11%, expat 2%. Base: total gross. Monthly. From Oct 2025 expat changed to 2%+2%.",chineseTranslation:"EPF养老公积金。雇主侧：本地员工月薪≤RM5,000为13%、>RM5,000为12%，外派2%；雇员侧：本地11%，外派2%。缴费基数为税前合计，每月申报。2025年10月起外国人改为2%+2%。责任主体：双边缴纳ER&EE。",lastUpdated:"2025-10-15",effectiveDate:"2025-10-01",history:[{date:"2025-10-01",change:"外国人EPF改为雇主2%+雇员2%"}],officialUrl:"https://www.kwsp.gov.my/en/"},
-  {id:"my_socso",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"SOCSO 社会保险（工伤保险）",article:"Act 4 / PERKESO",category:"社保规定",subcategory:"法定缴费类",importance:"high",originalText:"SOCSO (Work injury). Employer: local ~1.75%, expat ~1.25%; Employee: local ~0.5%, expat 0.5%. Wage ceiling RM6,000. Monthly. Most expats under 60 covered under category 1 since Oct 2024.",chineseTranslation:"SOCSO工伤保险。雇主侧本地约1.75%、外派约1.25%；雇员侧本地约0.5%、外派0.5%。缴费基数上限RM6,000，每月申报。2024年10月起绝大部分60岁以下外国雇员纳入第一类（工伤+残疾）。",lastUpdated:"2025-11-20",effectiveDate:"2024-10-01",history:[{date:"2024-10-01",change:"缴费基数上限由RM5,000上调至RM6,000"}],officialUrl:"https://www.perkeso.gov.my/"},
-  {id:"my_eis",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"EIS 就业保险（失业保险）",article:"Act 800 / PERKESO",category:"社保规定",subcategory:"法定缴费类",importance:"medium",originalText:"EIS (Unemployment). Fixed rate 0.20% employer + 0.20% employee. Wage ceiling RM6,000. Local employees only (expats not applicable). Monthly.",chineseTranslation:"EIS失业保险。固定比率：雇主0.20%+雇员0.20%，缴费基数上限RM6,000，每月申报。仅限马来西亚公民和永久居民（PR），外籍员工目前不适用。",lastUpdated:"2025-12-10",effectiveDate:"2025-01-01",history:[{date:"2025-01-01",change:"确认0.2%+0.2%费率与RM6,000上限"}],officialUrl:"https://www.perkeso.gov.my/en/"},
-  {id:"my_hrdf",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"HRDF 人力资源发展基金",article:"PSMB Act 2001",category:"社保规定",subcategory:"法定缴费类",importance:"medium",originalText:"HRDF levy. Employer only, fixed 1%. Base: base salary + fixed allowance (OT & bonus excluded). Mandatory for all industries employing ≥10 local employees. Monthly.",chineseTranslation:"HRDF人力资源发展基金。仅雇主侧缴纳，固定1%。基数=基本工资+固定津贴（不含加班与奖金）。雇佣10名及以上本地员工的所有行业强制缴纳，仅针对本地员工。用于员工技能提升账户。",lastUpdated:"2026-01-08",effectiveDate:"2025-01-01",history:[{date:"2025-01-01",change:"确认1%雇主强制缴费"}],officialUrl:"https://hrdcorp.gov.my/"},
-  // 休假类 Leave
-  {id:"my_al",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"年假 Annual Leave",article:"EA 1955 S60E",category:"休假",subcategory:"年假",importance:"high",originalText:"Annual leave by service: <2y→8 days; 2–5y→12 days; ≥5y→16 days. Employer 100% pay = Basic salary/26 × unused days. Pro-rated if leave before 1 year.",chineseTranslation:"按工龄授予年假：工龄<2年8天；2-5年12天；≥5年16天。雇主100%支付，未休折现=基本工资/26×未休天数。未满一年离职按比例折算，未休年假次年12个月后自动作废（合同另有规定除外）。",lastUpdated:"2026-01-15",effectiveDate:"2023-01-01",history:[{date:"2023-01-01",change:"2022年雇佣（修正）法令生效"}],officialUrl:"https://www.dosh.gov.my"},
-  {id:"my_sl",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"病假 Sick Leave",article:"EA 1955 S60F",category:"休假",subcategory:"病假",importance:"medium",originalText:"Sick leave by service: 1–2y→14 days; 2–5y→18 days; >5y→22 days (paid). Hospitalization: up to 60 days/year total. Requires MC from registered doctor, notify employer within 48h.",chineseTranslation:"按工龄带薪病假：1-2年14天；2-5年18天；超过5年22天。长期病假/住院假一年最多60天（含14-22天带薪病假）。须由注册医生或牙医开具证明（MC），48小时内通知雇主。雇主100%支付。",lastUpdated:"2026-02-12",effectiveDate:"2023-01-01",history:[{date:"2023-01-01",change:"收录病假分档标准"}],officialUrl:"https://www.dosh.gov.my"},
-  {id:"my_ml",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"产假 Maternity Leave",article:"EA 1955 (Act A1651)",category:"休假",subcategory:"产假",importance:"high",originalText:"Maternity leave 98 consecutive days, earliest 30 days before expected delivery. Eligibility: employed ≥90 days in the 9 months before, and ≥1 day in the 4 months before; <5 surviving children. Employer 100% pay.",chineseTranslation:"产假98天连续假期，最早可在预产期前30天开始。资格：分娩前9个月内至少受雇满90天，前4个月内至少受雇满1天，存活子女少于5名。雇主100%支付。2022年雇佣（修正）法令将产假增至98天。",lastUpdated:"2026-02-28",effectiveDate:"2023-01-01",history:[{date:"2023-01-01",change:"产假由60天增至98天"}],officialUrl:"https://www.dosh.gov.my"},
-  {id:"my_pl",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"陪产假 Paternity Leave",article:"EA 1955 (Act A1651)",category:"休假",subcategory:"陪产假",importance:"medium",originalText:"Paternity leave 7 consecutive days (incl. rest days & public holidays). Married male employees, ≥12 months service with same employer, first 5 confinements only, notify ≥30 days before. Employer 100% pay.",chineseTranslation:"陪产假7天连续假期（含休息日和公假）。仅限已婚男性员工，同一雇主处服务满12个月，仅限首5次分娩，须在预产期前至少30天通知雇主。雇主100%支付。",lastUpdated:"2026-03-10",effectiveDate:"2023-01-01",history:[{date:"2023-01-01",change:"新增7天法定陪产假"}],officialUrl:"https://www.dosh.gov.my"},
-  // 工时与加班 Working Time & Overtime
-  {id:"my_ot",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"工时与加班 Working Time & Overtime",article:"EA 1955 S60A",category:"工作时间",subcategory:"加班",importance:"high",originalText:"Weekday OT: hourly=monthly/208, 1.5×. Rest day: ≤4h→0.5 day wage, 4-8h→1 day, >8h→2× hourly. Public holiday: ≤8h→2 day wage, >8h→3× hourly. Cap: OT ≤4h/day (total ≤12h/day), ≤104h/month. Applies to employees earning ≤RM4,000 since 2023.",chineseTranslation:"工作日加班：小时工资=月薪/208，1.5倍时薪。周末加班：4小时内0.5倍日薪、4-8小时1倍日薪、8小时外2倍时薪。公共假期加班：8小时内2倍日薪、8小时外3倍时薪。上限：每日加班≤4小时（含工时总计≤12小时），≤104小时/月。自2023年起适用于月薪≤RM4,000员工。",lastUpdated:"2026-03-18",effectiveDate:"2023-01-01",history:[{date:"2023-01-01",change:"加班费规定适用于月薪≤RM4,000员工"}],officialUrl:"https://www.dosh.gov.my"},
-  // 离职与遣散 Termination & Severance
-  {id:"my_sev",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"离职与遣散 Termination & Severance",article:"雇佣（解雇及终结服务福利）规例 1980",category:"离职结算",subcategory:"遣散费",importance:"high",originalText:"Notice by service: <2y→4 weeks(28d); 2-5y→6 weeks(42d); ≥5y→8 weeks(56d). Severance (≤RM4,000 or manual labor): <2y→10 days wage; 2-5y→15 days; ≥5y→20 days. Final pay within 7 days: current month salary, unused AL, notice-in-lieu, severance. Misconduct: immediate dismissal after domestic inquiry, no notice/pay.",chineseTranslation:"通知期按连续服务年限：不满2年4周（28天）；2-5年6周（42天）；5年及以上8周（56天）。遣散补偿（月薪≤RM4,000或特定体力岗）：不满2年10天工资；2-5年15天；5年及以上20天。结算清单：离职当月薪资、未休年假折现、替代通知金、离职补偿金，须在合同终止起7天内结清。违纪解雇经国内调查后可立即解雇，无需通知或代通知金。工资/年假折现/替代通知金需缴EPF，遣散补偿金通常豁免EPF/SOCSO。",lastUpdated:"2026-04-05",effectiveDate:"2025-01-01",history:[{date:"2025-01-01",change:"确认按工龄分档通知期与遣散补偿标准"}],officialUrl:"https://www.mohr.gov.my"},
-  // 个税 Income Tax（非法定福利项，仅做记录）
-  {id:"my_tax",country:"Malaysia",countryCode:"MY",flag:"🇲🇾",region:"Asia",lawName:"个人所得税 Income Tax",article:"Income Tax Act 1967",category:"个税",subcategory:"税率",importance:"medium",originalText:"Progressive rates for tax residents (≥182 days/calendar year in Malaysia): 0-5,000→0%; 5,001-20,000→1%; 20,001-35,000→3%; 35,001-50,000→6%; 50,001-100,000→11%/19%; 100,001-400,000→25%; 400,001-2,000,000→26%/28%; >2,000,000→30%. Non-resident (<182 days): flat 30%.",chineseTranslation:"税务居民（一个日历年在马累计居住满182天）累进税率：0-5,000为0%；5,001-20,000为1%；20,001-35,000为3%；35,001-50,000为6%；50,001-100,000为11%/19%；100,001-400,000为25%；400,001-2,000,000为26%/28%；超过2,000,000为30%。非税务居民（居住不满182天，如新入职外派）固定税率30%。",lastUpdated:"2026-04-22",effectiveDate:"2025-01-01",history:[{date:"2025-01-01",change:"确认累进税率与非居民30%固定税率"}],officialUrl:"https://www.hasil.gov.my"},
-  {id:"th_001",country:"Thailand",countryCode:"TH",flag:"🇹🇭",region:"Asia",lawName:"Labor Protection Act",article:"S54",category:"工作时间",importance:"high",originalText:"Max 8h/day, not exceeding 40h/week. Rest day required.",chineseTranslation:"最长8小时/天，不超过40小时/周。必须有休息日。",lastUpdated:"2025-05-20",effectiveDate:"2025-06-01",history:[{date:"2024-01-01",change:"调整最低工资标准"},{date:"2022-06-01",change:"修改加班规定"}],officialUrl:"https://www.labor.go.th"},
-  {id:"th_002",country:"Thailand",countryCode:"TH",flag:"🇹🇭",region:"Asia",lawName:"Social Security Act",article:"S33",category:"社保规定",importance:"medium",originalText:"SSO contribution: 5% each (employee & employer), capped.",chineseTranslation:"社保缴费：员工和雇主各5%，有上限。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"调整缴费基数上限"}],officialUrl:"https://www.sso.go.th"},
-  {id:"th_003",country:"Thailand",countryCode:"TH",flag:"🇹🇭",region:"Asia",lawName:"Labor Protection Act",article:"S30",category:"休假",importance:"high",originalText:"Annual leave: min 6 days after 1 year. Public holidays: 13 days.",chineseTranslation:"年假：满1年最少6天。法定假日：13天。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2024-01-01",change:"新增家庭日假期"}],officialUrl:"https://www.labor.go.th"},
-  {id:"vn_001",country:"Vietnam",countryCode:"VN",flag:"🇻🇳",region:"Asia",lawName:"Labor Code 2019",article:"S105",category:"休假",importance:"high",originalText:"Annual leave: 12 days/year, increases by 1 day every 5 years.",chineseTranslation:"年假：每年12天，每5年增加1天。",lastUpdated:"2025-04-01",effectiveDate:"2025-04-01",history:[{date:"2024-01-01",change:"调整产假天数"}],officialUrl:"https://vbpl.chinhphu.vn"},
-  {id:"vn_002",country:"Vietnam",countryCode:"VN",flag:"🇻🇳",region:"Asia",lawName:"Labor Code 2019",article:"S98",category:"工资",importance:"high",originalText:"Overtime rate: 150% weekday, 200% rest day, 300% holiday.",chineseTranslation:"加班费率：工作日150%，休息日200%，节假日300%。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"调整最低工资区域"}],officialUrl:"https://vbpl.chinhphu.vn"},
-  {id:"id_001",country:"Indonesia",countryCode:"ID",flag:"🇮🇩",region:"Asia",lawName:"Job Creation Law",article:"S81",category:"社保规定",importance:"high",originalText:"BPJS: Employment 0.5-1.04%, Health 4%, JKK, JKM mandatory.",chineseTranslation:"社保：就业险0.5-1.04%，健康险4%，工伤险、死亡险强制。",lastUpdated:"2025-06-01",effectiveDate:"2025-06-01",history:[{date:"2024-01-01",change:"扩大社保覆盖范围"}],officialUrl:"https://www.bpjsketenagakerjaan.go.id"},
-  {id:"id_002",country:"Indonesia",countryCode:"ID",flag:"🇮🇩",region:"Asia",lawName:"PP No. 35/2021",article:"S3",category:"离职结算",importance:"high",originalText:"Severance: 1-9 months salary based on service years.",chineseTranslation:"遣散费：根据工龄1-9个月工资。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"调整遣散费计算方式"}],officialUrl:"https://peraturan.go.id"},
-  {id:"in_001",country:"India",countryCode:"IN",flag:"🇮🇳",region:"Asia",lawName:"Code on Wages 2019",article:"S5",category:"工资",importance:"high",originalText:"Minimum wages fixed by government, reviewed every 5 years.",chineseTranslation:"最低工资由政府确定，每5年审查一次。",lastUpdated:"2025-04-01",effectiveDate:"2025-04-01",history:[{date:"2024-01-01",change:"统一全国最低工资标准"}],officialUrl:"https://www.labour.gov.in"},
-  {id:"in_002",country:"India",countryCode:"IN",flag:"🇮🇳",region:"Asia",lawName:"Code on Social Security 2020",article:"S108",category:"社保规定",importance:"high",originalText:"EPF: 12% each. ESI: 0.75% employee, 3.25% employer.",chineseTranslation:"公积金：各12%。社保：员工0.75%，雇主3.25%。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"扩大ESI覆盖范围"}],officialUrl:"https://www.epfindia.gov.in"},
-  {id:"in_003",country:"India",countryCode:"IN",flag:"🇮🇳",region:"Asia",lawName:"Industrial Relations Code 2020",article:"S51",category:"劳动合同",importance:"medium",originalText:"Standing orders mandatory for establishments with 300+ workers.",chineseTranslation:"300人以上企业必须制定常设命令。",lastUpdated:"2025-03-01",effectiveDate:"2025-03-01",history:[{date:"2024-01-01",change:"调整工会注册要求"}],officialUrl:"https://www.labour.gov.in"},
-  {id:"jp_001",country:"Japan",countryCode:"JP",flag:"🇯🇵",region:"Asia",lawName:"Labor Standards Act",article:"S32",category:"工作时间",importance:"high",originalText:"Normal: 8h/day, 40h/week. Premium: 25% overtime, 50% late night, 50% holiday.",chineseTranslation:"正常工时：每天8小时，每周40小时。加班25%，深夜50%，假日50%。",lastUpdated:"2025-04-01",effectiveDate:"2025-04-01",history:[{date:"2024-04-01",change:"上限管理制全面实施"},{date:"2023-04-01",change:"同工同酬法生效"}],officialUrl:"https://www.mhlw.go.jp"},
-  {id:"jp_002",country:"Japan",countryCode:"JP",flag:"🇯🇵",region:"Asia",lawName:"Child Care & Family Care Leave Act",article:"S5",category:"休假",importance:"high",originalText:"Parental leave: up to child age 1. Partial: 67% first 6mo, 50% after.",chineseTranslation:"育儿假：到孩子1岁。前6个月67%，之后50%。",lastUpdated:"2025-04-01",effectiveDate:"2025-04-01",history:[{date:"2024-10-01",change:"扩大适用范围至中小企业"},{date:"2022-04-01",change:"提高育婴假期间薪资补贴"}],officialUrl:"https://www.mhlw.go.jp"},
-  {id:"kr_001",country:"South Korea",countryCode:"KR",flag:"🇰🇷",region:"Asia",lawName:"Labor Standards Act",article:"S50",category:"工作时间",importance:"high",originalText:"Normal: 8h/day, 40h/week. Max 52h total including OT.",chineseTranslation:"正常工时：每天8小时，每周40小时。含加班最多52小时。",lastUpdated:"2025-07-01",effectiveDate:"2025-07-01",history:[{date:"2024-01-01",change:"缩短最长工时"},{date:"2022-01-01",change:"52小时工时制全面实施"}],officialUrl:"https://www.moel.go.kr"},
-  {id:"kr_002",country:"South Korea",countryCode:"KR",flag:"🇰🇷",region:"Asia",lawName:"National Pension Act",article:"S3",category:"社保规定",importance:"high",originalText:"Pension: 4.5% each (employee & employer).",chineseTranslation:"养老金：员工和雇主各4.5%。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"调整缴费基数"}],officialUrl:"https://www.nps.or.kr"},
-  {id:"cn_001",country:"China",countryCode:"CN",flag:"🇨🇳",region:"Asia",lawName:"Labor Contract Law",article:"S19",category:"劳动合同",importance:"high",originalText:"Fixed-term contracts: max 2 consecutive terms, then open-ended.",chineseTranslation:"固定期限合同：最多连续2次，之后应签无固定期限合同。",lastUpdated:"2025-03-01",effectiveDate:"2025-03-01",history:[{date:"2024-01-01",change:"调整试用期规定"},{date:"2022-01-01",change:"灵活用工规范"}],officialUrl:"https://www.mohrss.gov.cn"},
-  {id:"cn_002",country:"China",countryCode:"CN",flag:"🇨🇳",region:"Asia",lawName:"Social Insurance Law",article:"S10",category:"社保规定",importance:"high",originalText:"5 insurances + 1 fund mandatory. Employer ~30%, Employee ~10%.",chineseTranslation:"五险一金强制。雇主约30%，员工约10%。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"调整社保缴费基数"},{date:"2021-01-01",change:"工伤保险费率调整"}],officialUrl:"https://www.mohrss.gov.cn"},
-  {id:"cn_003",country:"China",countryCode:"CN",flag:"🇨🇳",region:"Asia",lawName:"Labor Law",article:"S44",category:"工资",importance:"high",originalText:"OT: 150% weekday, 200% rest day, 300% statutory holiday.",chineseTranslation:"加班：工作日150%，休息日200%，法定节假日300%。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"个税专项附加扣除调整"}],officialUrl:"https://www.mohrss.gov.cn"},
-  {id:"cn_004",country:"China",countryCode:"CN",flag:"🇨🇳",region:"Asia",lawName:"Marriage & Childcare Leave Regs",article:"Various",category:"休假",importance:"medium",originalText:"Maternity: 98 days + local extension. Paternity: 15-30 days.",chineseTranslation:"产假：98天+地方延长。陪产假：15-30天。",lastUpdated:"2025-06-01",effectiveDate:"2025-06-01",history:[{date:"2024-01-01",change:"多地延长产假至158天"},{date:"2023-01-01",change:"育儿假制度推广"}],officialUrl:"https://www.mohrss.gov.cn"},
-  {id:"de_001",country:"Germany",countryCode:"DE",flag:"🇩🇪",region:"Europe",lawName:"Arbeitszeitgesetz",article:"S3",category:"工作时间",importance:"high",originalText:"Max 8h/day, extendable to 10h if averaged 8h over 6 months.",chineseTranslation:"每天最多8小时，如6个月平均8小时可延长至10小时。",lastUpdated:"2025-03-01",effectiveDate:"2025-03-01",history:[{date:"2024-01-01",change:"工时记录义务强化"}],officialUrl:"https://www.bmas.de"},
-  {id:"de_002",country:"Germany",countryCode:"DE",flag:"🇩🇪",region:"Europe",lawName:"Bundesurlaubsgesetz",article:"S1",category:"休假",importance:"high",originalText:"Minimum 20 days paid annual leave. CBAs often provide 25-30.",chineseTranslation:"最少20天带薪年假。集体协议通常25-30天。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"法定假日调整"}],officialUrl:"https://www.bmas.de"},
-  {id:"de_003",country:"Germany",countryCode:"DE",flag:"🇩🇪",region:"Europe",lawName:"Kündigungsschutzgesetz",article:"S1",category:"离职结算",importance:"high",originalText:"Dismissal requires written reasons and works council consultation.",chineseTranslation:"解雇需书面理由并咨询工会。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2024-01-01",change:"数字劳工法调整"}],officialUrl:"https://www.bmas.de"},
-  {id:"fr_001",country:"France",countryCode:"FR",flag:"🇫🇷",region:"Europe",lawName:"Code du Travail",article:"L3121-27",category:"工作时间",importance:"high",originalText:"35h/week standard. OT: 25% first 8h, 50% beyond. 10h/day max.",chineseTranslation:"每周35小时标准工时。加班前8小时25%，超出50%。每天最多10小时。",lastUpdated:"2025-04-01",effectiveDate:"2025-04-01",history:[{date:"2024-01-01",change:"加班补偿方式调整"},{date:"2023-01-01",change:"Right to disconnect强化"}],officialUrl:"https://www.travail-emploi.gouv.fr"},
-  {id:"fr_002",country:"France",countryCode:"FR",flag:"🇫🇷",region:"Europe",lawName:"Code du Travail",article:"L3141-1",category:"休假",importance:"high",originalText:"5 weeks (30 days) paid leave + RTT days.",chineseTranslation:"5周（30天）带薪年假+RTT调休假。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"RTT计算规则调整"}],officialUrl:"https://www.travail-emploi.gouv.fr"},
-  {id:"fr_003",country:"France",countryCode:"FR",flag:"🇫🇷",region:"Europe",lawName:"Sécurité Sociale",article:"L242-1",category:"社保规定",importance:"high",originalText:"Social charges: ~45% employer, ~25% employee.",chineseTranslation:"社保缴费：雇主约45%，员工约25%。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2024-01-01",change:"费率微调"}],officialUrl:"https://www.securite-sociale.fr"},
-  {id:"gb_001",country:"United Kingdom",countryCode:"GB",flag:"🇬🇧",region:"Europe",lawName:"Working Time Regulations",article:"S4",category:"工作时间",importance:"high",originalText:"48h/week max (opt-out possible). 11h rest/day, 24h rest/week.",chineseTranslation:"每周最多48小时（可选择退出）。每天11小时休息，每周24小时休息。",lastUpdated:"2025-06-01",effectiveDate:"2025-06-01",history:[{date:"2024-01-01",change:"零工经济权利扩展"}],officialUrl:"https://www.legislation.gov.uk"},
-  {id:"gb_002",country:"United Kingdom",countryCode:"GB",flag:"🇬🇧",region:"Europe",lawName:"Employment Rights Act 1996",article:"S13",category:"休假",importance:"medium",originalText:"5.6 weeks (28 days) paid annual leave. Bank holidays included.",chineseTranslation:"5.6周（28天）带薪年假。含银行假日。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"节日工资规则调整"}],officialUrl:"https://www.legislation.gov.uk"},
-  {id:"gb_003",country:"United Kingdom",countryCode:"GB",flag:"🇬🇧",region:"Europe",lawName:"National Insurance Act",article:"S1",category:"社保规定",importance:"high",originalText:"NI: Employee 8% (above threshold), Employer 13.8%.",chineseTranslation:"国民保险：员工8%（超门槛），雇主13.8%。",lastUpdated:"2025-04-01",effectiveDate:"2025-04-01",history:[{date:"2024-01-01",change:"NI费率调整"}],officialUrl:"https://www.legislation.gov.uk"},
-  {id:"it_001",country:"Italy",countryCode:"IT",flag:"🇮🇹",region:"Europe",lawName:"D.Lgs. 66/2003",article:"S4",category:"工作时间",importance:"medium",originalText:"48h/week max averaged over 4 months. Daily 13h with breaks.",chineseTranslation:"每周最多48小时（4个月平均）。每天13小时含休息。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"弹性工作制扩展"}],officialUrl:"https://www.gazzettaufficiale.it"},
-  {id:"nl_001",country:"Netherlands",countryCode:"NL",flag:"🇳🇱",region:"Europe",lawName:"Working Hours Act",article:"S2:1",category:"工作时间",importance:"medium",originalText:"12h/day max, 60h/week max. Averaged 48h/week over 16 weeks.",chineseTranslation:"每天最多12小时，每周最多60小时。16周内平均48小时/周。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2024-01-01",change:"远程办公法规调整"}],officialUrl:"https://www.rijksoverheid.nl"},
-  {id:"nl_002",country:"Netherlands",countryCode:"NL",flag:"🇳🇱",region:"Europe",lawName:"Working Hours Act",article:"S4:1",category:"休假",importance:"medium",originalText:"Minimum 20 days (4 weeks) paid leave. Many CBAs provide 25-30.",chineseTranslation:"最少20天（4周）带薪假。许多集体协议提供25-30天。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"假期累积规则调整"}],officialUrl:"https://www.rijksoverheid.nl"},
-  {id:"pl_001",country:"Poland",countryCode:"PL",flag:"🇵🇱",region:"Europe",lawName:"Labor Code",article:"S154",category:"休假",importance:"medium",originalText:"20 days (< 10y service) or 26 days (≥ 10y) paid annual leave.",chineseTranslation:"20天（工龄<10年）或26天（≥10年）带薪年假。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"休假权保障加强"}],officialUrl:"https://isap.sejm.gov.pl"},
-  {id:"es_001",country:"Spain",countryCode:"ES",flag:"🇪🇸",region:"Europe",lawName:"Estatuto de los Trabajadores",article:"S34",category:"工作时间",importance:"high",originalText:"40h/week averaged annually. Max 9h/day. Rest: 1.5h between shifts.",chineseTranslation:"每周40小时（年度平均）。每天最多9小时。班次间休息1.5小时。",lastUpdated:"2025-06-01",effectiveDate:"2025-06-01",history:[{date:"2025-01-01",change:"工时记录义务扩大"},{date:"2024-01-01",change:"数字游民签证推出"}],officialUrl:"https://www.boe.es"},
-  {id:"es_002",country:"Spain",countryCode:"ES",flag:"🇪🇸",region:"Europe",lawName:"Estatuto de los Trabajadores",article:"S38.1",category:"休假",importance:"high",originalText:"Minimum 30 calendar days paid annual leave.",chineseTranslation:"最低30个日历日带薪年假。",lastUpdated:"2025-07-01",effectiveDate:"2025-07-01",history:[{date:"2024-01-01",change:"地区假日协调"}],officialUrl:"https://www.boe.es"},
-  {id:"se_001",country:"Sweden",countryCode:"SE",flag:"🇸🇪",region:"Europe",lawName:"Working Hours Act",article:"§5",category:"工作时间",importance:"high",originalText:"Normal: max 40h/week. CBAs often set 37.5h.",chineseTranslation:"正常工时：每周最多40小时。集体协议通常为37.5小时。",lastUpdated:"2025-03-01",effectiveDate:"2025-03-01",history:[{date:"2024-01-01",change:"弹性工时协议扩展"}],officialUrl:"https://www.riksdagen.se"},
-  {id:"us_001",country:"United States",countryCode:"US",flag:"🇺🇸",region:"Americas",lawName:"Fair Labor Standards Act",article:"S207",category:"工作时间",importance:"high",originalText:"40h/week standard. OT: 1.5x. FLSA salary threshold: $684/week.",chineseTranslation:"每周40小时标准。加班1.5倍。FLSA薪资门槛：$684/周。",lastUpdated:"2025-07-01",effectiveDate:"2025-07-01",history:[{date:"2024-01-01",change:"联邦加班薪资门槛调整"},{date:"2023-01-01",change:"各州最低工资上涨"}],officialUrl:"https://www.dol.gov"},
-  {id:"us_002",country:"United States",countryCode:"US",flag:"🇺🇸",region:"Americas",lawName:"ACA",article:"S4980H",category:"社保规定",importance:"medium",originalText:"Employers 50+ FTEs must offer health insurance or pay penalty.",chineseTranslation:"50人以上企业须提供健康保险或缴纳罚款。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2024-01-01",change:"保费调整"},{date:"2023-01-01",change:"报告要求变更"}],officialUrl:"https://www.irs.gov"},
-  {id:"ca_001",country:"Canada",countryCode:"CA",flag:"🇨🇦",region:"Americas",lawName:"Canada Labour Code",article:"S167",category:"休假",importance:"high",originalText:"Paid vacation: 2 weeks (1-5y), 3 weeks (5+y). Unpaid: 2 weeks.",chineseTranslation:"带薪假：2周（1-5年），3周（5年以上）。无薪假2周。",lastUpdated:"2025-04-01",effectiveDate:"2025-04-01",history:[{date:"2024-01-01",change:"联邦带薪病假实施"},{date:"2023-01-01",change:"10天带薪假权"}],officialUrl:"https://laws-lois.justice.gc.ca"},
-  {id:"br_001",country:"Brazil",countryCode:"BR",flag:"🇧🇷",region:"Americas",lawName:"CLT",article:"S58",category:"工作时间",importance:"high",originalText:"44h/week, 8h/day + 1h lunch. Compressed schedules allowed.",chineseTranslation:"每周44小时，每天8小时+1小时午餐。允许压缩工时。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2024-01-01",change:"远程办公规定细化"},{date:"2023-01-01",change:"平台工经济规范"}],officialUrl:"https://www.planalto.gov.br"},
-  {id:"br_002",country:"Brazil",countryCode:"BR",flag:"🇧🇷",region:"Americas",lawName:"CLT",article:"S614",category:"社保规定",importance:"high",originalText:"INSS: Employee 7.5-14%, Employer 20%. FGTS: 8%.",chineseTranslation:"社保：员工7.5-14%，雇主20%。FGTS：8%。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2024-01-01",change:"社保费率调整"}],officialUrl:"https://www.planalto.gov.br"},
-  {id:"mx_001",country:"Mexico",countryCode:"MX",flag:"🇲🇽",region:"Americas",lawName:"Federal Labor Law",article:"S61",category:"工作时间",importance:"high",originalText:"48h/week, 8h/day. Triple pay on holidays. Sunday premium.",chineseTranslation:"每周48小时，每天8小时。节假日三倍工资。周日津贴。",lastUpdated:"2025-06-01",effectiveDate:"2025-06-01",history:[{date:"2024-01-01",change:"劳动改革实施"},{date:"2023-01-01",change:"最低工资上调"}],officialUrl:"https://www.gob.mx/stps"},
-  {id:"mx_002",country:"Mexico",countryCode:"MX",flag:"🇲🇽",region:"Americas",lawName:"Social Security Law",article:"S15",category:"社保规定",importance:"high",originalText:"IMSS contributions vary by salary bracket. Employer bears most.",chineseTranslation:"IMSS缴费按薪资等级变化。雇主承担大部分。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2024-01-01",change:"缴费基数调整"}],officialUrl:"https://www.gob.mx/imss"},
-  {id:"za_001",country:"South Africa",countryCode:"ZA",flag:"🇿🇦",region:"Africa",lawName:"Basic Conditions of Employment Act",article:"S10",category:"休假",importance:"medium",originalText:"Annual leave: 21 consecutive days (3 weeks) or equal in hours.",chineseTranslation:"年假：连续21天（3周）或等值小时数。",lastUpdated:"2025-01-01",effectiveDate:"2025-01-01",history:[{date:"2023-01-01",change:"病假规定调整"}],officialUrl:"https://www.gov.za"},
-  {id:"au_001",country:"Australia",countryCode:"AU",flag:"🇦🇺",region:"Oceania",lawName:"Fair Work Act 2009",article:"S62",category:"工作时间",importance:"high",originalText:"38h/week standard + reasonable additional hours. Penalty rates apply.",chineseTranslation:"每周38小时标准+合理加班。适用惩罚性费率。",lastUpdated:"2025-07-01",effectiveDate:"2025-07-01",history:[{date:"2024-01-01",change:"最低工资上调5.75%"},{date:"2023-01-01",change:"同工同酬法修正"}],officialUrl:"https://www.fairwork.gov.au"}
-];
-
-// ============ AI MONITOR DATA ============
-const aiMonitorData = [
-  {country:"Singapore",flag:"🇸🇬",title:"Employment Act Amendment — Enhanced Worker Protections",date:"2025-06-15",effective:"2025-08-01",impact:"high",summary:"新加坡更新了雇佣法，加强了对临时工和平台工人的保护。加班上限调整，解雇通知期延长。",summary_en:"Singapore updated the Employment Act with enhanced protections for platform and temporary workers.",modules:["Contracts","Payroll","Leave"],recommendation:"审查所有非全日制员工合同，更新薪酬系统中的加班计算逻辑。",recommendation_en:"Review all part-time contracts. Update payroll OT calculations."},
-  {country:"Thailand",flag:"🇹🇭",title:"Minimum Wage Increase — 400 THB/day Nationwide",date:"2025-06-20",effective:"2025-07-01",impact:"high",summary:"泰国全国最低工资统一调整至400泰铢/天，影响约1000万劳动者。",summary_en:"Thailand unified minimum wage to 400 THB/day, affecting ~10M workers.",modules:["Payroll","Compliance"],recommendation:"立即更新薪酬系统，确保7月1日起所有员工符合新最低工资标准。",recommendation_en:"Update payroll systems immediately for July 1 compliance."},
-  {country:"Malaysia",flag:"🇲🇾",title:"EPF Contribution Rate Adjustment FY2025",date:"2025-06-10",effective:"2025-07-01",impact:"medium",summary:"马来西亚调整EPF缴费比例，雇主部分上调至15%，员工部分维持11%。",summary_en:"Malaysia adjusted EPF rates: employer contribution increased to 15%.",modules:["Payroll","Benefits"],recommendation:"更新工资单模板，通知员工新的缴费比例，调整预算。",recommendation_en:"Update payslips, notify employees, adjust budgets."},
-  {country:"Japan",flag:"🇯🇵",title:"Childcare Leave Reform — Enhanced Paternity Benefits",date:"2025-05-28",effective:"2025-10-01",impact:"medium",summary:"日本大幅改善育儿假制度，男性陪产假从4周延长至12周，薪资补贴提升至80%。",summary_en:"Japan expanded paternity leave from 4 to 12 weeks with 80% pay subsidy.",modules:["Leave","Benefits","Compliance"],recommendation:"更新休假政策手册，制定男性员工育儿假激励计划。",recommendation_en:"Update leave policy handbook. Create paternity leave incentive plan."},
-  {country:"Germany",flag:"🇩🇪",title:"Minimum Wage Increase to €12.82/hour",date:"2025-06-01",effective:"2025-07-01",impact:"high",summary:"德国法定最低工资从€12.41上调至€12.82/小时，影响约600万低薪工人。",summary_en:"Germany raised minimum wage from €12.41 to €12.82/hour.",modules:["Payroll","Compliance"],recommendation:"审查并更新所有低于新最低工资标准的员工薪资。",recommendation_en:"Review and update salaries below new minimum wage."},
-  {country:"France",flag:"🇫🇷",title:"35-Hour Week — Overtime Premium Changes",date:"2025-04-15",effective:"2025-05-01",impact:"medium",summary:"法国调整加班补偿标准，超出35小时后的前8小时加班补偿从25%提升至30%。",summary_en:"France increased first-tier overtime premium from 25% to 30%.",modules:["Payroll","Working Hours"],recommendation:"更新薪酬系统中的加班费率设置。",recommendation_en:"Update overtime rates in payroll systems."},
-  {country:"United Kingdom",flag:"🇬🇧",title:"Zero-Hour Contract Worker Rights",date:"2025-05-10",effective:"2025-06-01",impact:"medium",summary:"英国加强零时合同工人权利，要求雇主提供最低工时保证和提前排班通知。",summary_en:"UK enhanced zero-hour contract rights with minimum hours guarantees.",modules:["Contracts","Compliance"],recommendation:"审查零时合同条款，建立排班通知流程。",recommendation_en:"Review zero-hour contracts. Establish scheduling notice procedures."},
-  {country:"United States",flag:"🇺🇸",title:"FLSA Salary Threshold Increase to $1,128/week",date:"2025-06-25",effective:"2025-07-01",impact:"high",summary:"美国联邦FLSA加班豁免薪资门槛从$684/周上调至$1,128/周，影响数百万白领工人。",summary_en:"US FLSA overtime exemption threshold raised from $684 to $1,128/week.",modules:["Payroll","Contracts","Compliance"],recommendation:"立即审计所有受影响职位，调整薪资或加班分类。",recommendation_en:"Audit all affected positions immediately. Adjust salary or OT classification."},
-  {country:"Brazil",flag:"🇧🇷",title:"CLT Remote Work Framework Update",date:"2025-05-22",effective:"2025-06-15",impact:"medium",summary:"巴西更新CLT远程工作框架，要求雇主提供办公设备津贴并记录每日工时。",summary_en:"Brazil updated CLT remote work framework with equipment allowance requirements.",modules:["Working Hours","Benefits","Contracts"],recommendation:"建立远程办公设备补贴政策，配置每日工时记录系统。",recommendation_en:"Establish remote equipment stipend policy. Configure daily hours tracking."},
-  {country:"India",flag:"🇮🇳",title:"Code on Social Security — Gig Worker Coverage",date:"2025-06-05",effective:"2025-09-01",impact:"high",summary:"印度社会保障法典扩展至零工经济工人，平台企业须为其缴纳社保。",summary_en:"India extended social security to gig workers. Platform companies must contribute.",modules:["Benefits","Compliance"],recommendation:"评估零工经济合作伙伴的社保合规要求，更新供应商合同。",recommendation_en:"Assess gig worker social security requirements. Update vendor contracts."},
-  {country:"China",flag:"🇨🇳",title:"Flexible Employment Labor Regulations",date:"2025-06-18",effective:"2025-08-01",impact:"medium",summary:"中国出台灵活用工新规，明确平台企业劳动关系认定标准和社保缴纳义务。",summary_en:"China issued new flexible employment regulations clarifying labor relationship criteria.",modules:["Contracts","Compliance"],recommendation:"梳理所有灵活用工人员，评估劳动关系认定风险。",recommendation_en:"Audit all flexible workers. Assess labor relationship classification risks."},
-  {country:"South Korea",flag:"🇰🇷",title:"Maximum Working Hours Reduction — 52h to 48h",date:"2025-05-30",effective:"2026-01-01",impact:"high",summary:"韩国将最长工时从52小时缩短至48小时，预计2026年全面实施。",summary_en:"South Korea will reduce maximum working hours from 52h to 48h starting 2026.",modules:["Working Hours","Payroll"],recommendation:"提前制定工时调整计划，评估对业务运营的影响。",recommendation_en:"Plan working hours reduction strategy. Assess business impact."}
-];
-
-// ============ NOTIFICATIONS ============
-const notifData = [
-  {country:"Singapore",flag:"🇸🇬",title:"Employment Act Updated",date:"2025-07-15",isNew:true,effective:"2025-08-01",impact:"high",summary:"新加坡雇佣法更新，加强平台工人保护",modules:["Contracts","Payroll"]},
-  {country:"Thailand",flag:"🇹🇭",title:"Minimum Wage Adjusted",date:"2025-07-14",isNew:true,effective:"2025-07-01",impact:"high",summary:"泰国最低工资调整至400 THB/天",modules:["Payroll"]},
-  {country:"Malaysia",flag:"🇲🇾",title:"EPF Rules Updated",date:"2025-07-12",isNew:true,effective:"2025-07-01",impact:"medium",summary:"马来西亚EPF缴费比例调整",modules:["Payroll","Benefits"]},
-  {country:"Vietnam",flag:"🇻🇳",title:"Social Insurance Circular",date:"2025-07-08",isNew:false,effective:"2025-09-01",impact:"medium",summary:"越南社保条例更新",modules:["Benefits"]},
-  {country:"Japan",flag:"🇯🇵",title:"Childcare Leave Reform",date:"2025-07-05",isNew:false,effective:"2025-10-01",impact:"medium",summary:"日本育儿假制度改善",modules:["Leave"]},
-  {country:"Germany",flag:"🇩🇪",title:"Minimum Wage Increase",date:"2025-07-01",isNew:false,effective:"2025-07-01",impact:"high",summary:"德国最低工资上调至€12.82",modules:["Payroll"]},
-  {country:"United States",flag:"🇺🇸",title:"FLSA Threshold Change",date:"2025-06-25",isNew:false,effective:"2025-07-01",impact:"high",summary:"美国FLSA薪资门槛调整",modules:["Payroll","Contracts"]}
-];
-
-// ============ TREE MENU DATA ============
-const treeData = [
-  {label:'招聘管理',icon:'📋',sub:['简历筛选','面试流程','背景调查','Offer管理']},
-  {label:'员工关系',icon:'🤝',sub:['入职管理','试用期','转正流程','档案管理']},
-  {label:'薪酬管理',icon:'💰',sub:[
-    {label:'法定缴费类',sub:['社保','公积金','失业保险','工伤保险']},
-    {label:'休假管理',sub:['年假','病假','产假','育儿假','婚假','丧假','其他假期']},
-    {label:'强制支付/津贴',sub:['加班费','最低工资','节假日津贴','高温补贴']},
-    {label:'工时与加班',sub:['标准工时','加班规定','弹性工时','远程办公']},
-    {label:'离职与遣散',sub:['解雇保护','遣散费','经济补偿','离职手续']},
-    {label:'个人所得税',sub:['税率','申报','抵扣','跨境税务']}
-  ]},
-  {label:'培训发展',icon:'📚',sub:['强制培训','职业发展','技能认证']}
-];
-
-// ============ FILTER STATE ============
-let filteredData = [...laborLawData];
-let libraryData = [...laborLawData];
-let expandedCard = null;
-let selectedLawId = null;
-let currentCategory = '', currentSubcategory = '', currentBusinessNode = '';
-
-// ============ TREE RENDER ============
-function renderTree() {
-  const el = document.getElementById('treeMenu');
-  el.innerHTML = treeData.map(item => {
-    const hasSub = item.sub && item.sub.length > 0;
-    const isNested = hasSub && item.sub[0] && item.sub[0].sub; // Payroll has nested subs
-    if (isNested) {
-      return `<div class="tree-item" onclick="toggleTreeItem(this)">
-        <div class="tree-label"><span class="tree-arrow">▶</span><span>${item.icon||''} ${t(item.label)}</span></div>
-        <div class="tree-sub">${item.sub.map(group => `
-          <div class="tree-item" onclick="event.stopPropagation();toggleTreeItem(this)">
-            <div class="tree-label" style="padding-left:20px;font-size:0.68rem"><span class="tree-arrow" style="font-size:0.5rem">▶</span><span>${t(group.label)}</span></div>
-            <ul class="tree-sub">${group.sub.map(s => `<li onclick="event.stopPropagation();selectTreeItem(this,'${group.label}','${s}')">${t(s)}</li>`).join('')}</ul>
-          </div>`).join('')}</div>
-      </div>`;
-    }
-    return `<div class="tree-item" onclick="toggleTreeItem(this)">
-      <div class="tree-label"><span class="tree-arrow">▶</span><span>${item.icon||''} ${t(item.label)}</span></div>
-      <ul class="tree-sub">${item.sub.map(s => `<li onclick="event.stopPropagation();selectTreeItem(this,'${item.label}','${s}')">${t(s)}</li>`).join('')}</ul>
-    </div>`;
-  }).join('');
-}
-function toggleTreeItem(el) { el.classList.toggle('open'); }
-function selectTreeItem(el, cat, sub) {
-  el.closest('.tree-sub').querySelectorAll('li').forEach(li=>li.classList.remove('active'));
-  el.classList.add('active');
-  currentCategory = ''; currentSubcategory = cat; currentBusinessNode = sub;
-  applyFilters();
-}
-
-// ============ 业务节点筛选框（级联下拉） ============
-// 业务节点 -> 数据 category 映射
-const BIZ_CATEGORY_MAP = {
-  '招聘':      ['劳动合同'],
-  '员工关系':  ['入职离职','劳动合同'],
-  '培训发展':  [],            // 数据暂无对应类别
-  '薪酬管理':  null           // 由二级子节点决定
-};
-// 薪酬管理二级节点 -> 数据 category 映射
-const PAYROLL_SUB_MAP = {
-  '法定缴费类':  ['社保规定'],
-  '休假类':      ['休假'],
-  '强制支付':    ['工资'],
-  '工时与加班':  ['工作时间'],
-  '离职与遣散':  ['入职离职','离职结算'],
-  '个税':        ['个税']      // 数据暂无，选中则无结果
-};
-
-// 业务节点下拉变化：控制二级下拉显隐并联动筛选
-function onBizChange() {
-  const biz = document.getElementById('filterBiz').value;
-  const subSel = document.getElementById('filterBizSub');
-  if (biz === '薪酬管理') {
-    subSel.style.display = '';
-  } else {
-    subSel.style.display = 'none';
-    subSel.value = '';
-  }
-  applyFilters();
-}
-
-// 返回当前业务节点筛选对应的 category 白名单（null = 不限制）
-function currentBizCategories() {
-  const biz = document.getElementById('filterBiz') ? document.getElementById('filterBiz').value : '';
-  if (!biz) return null;
-  if (biz === '薪酬管理') {
-    const sub = document.getElementById('filterBizSub').value;
-    if (!sub) {
-      // 薪酬·全部：合并所有二级映射
-      return Object.values(PAYROLL_SUB_MAP).flat();
-    }
-    return PAYROLL_SUB_MAP[sub] || [];
-  }
-  return BIZ_CATEGORY_MAP[biz] || [];
-}
-
-// ============ FILTERS ============
-// Get current selected country for library
-let selectedCountry = '';
-
-function applyFilters() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const region = document.getElementById('filterRegion').value;
-  const country = document.getElementById('filterCountry').value;
-  const sortBy = document.getElementById('sortBy').value;
-  selectedCountry = country;
-  
-  // Timeline data: all laws (or filtered by region/country/search), sorted by date
-  filteredData = laborLawData.filter(item => {
-    if (region && item.region !== region) return false;
-    if (country && item.country !== country) return false;
-    if (search) {
-      const s = `${item.country} ${item.lawName} ${item.article} ${item.category} ${item.chineseTranslation} ${item.originalText}`.toLowerCase();
-      if (!s.includes(search)) return false;
-    }
-    return true;
-  });
-  filteredData.sort((a,b) => b.lastUpdated.localeCompare(a.lastUpdated));
-  
-  // 业务节点筛选（级联下拉）对应的 category 白名单
-  const bizCats = currentBizCategories();
-
-  // Library data: all laws for the selected country (or all if none selected)
-  libraryData = laborLawData.filter(item => {
-    if (country && item.country !== country) return false;
-    // 业务节点下拉筛选（优先于树菜单）
-    if (bizCats !== null && !bizCats.includes(item.category)) return false;
-    if (currentBusinessNode && item.subcategory !== currentBusinessNode) return false;
-    else if (currentSubcategory && item.category !== currentSubcategory) return false;
-    else if (currentCategory && item.category !== currentCategory) return false;
-    return true;
-  });
-  libraryData.sort((a,b) => a.country.localeCompare(b.country) || a.lawName.localeCompare(b.lawName));
-  
-  renderTimeline();
-  renderRightPanel();
-  renderLawCards();
-  // Update library subtitle
-  const libSub = document.getElementById('libSub');
-  if (libSub) libSub.textContent = country ? `${t('libSub')} — ${country}` : t('libSub');
-}
-
-// ============ POPULATE FILTERS ============
-const countryNameMap = {
-  'Singapore':'新加坡','Malaysia':'马来西亚','Thailand':'泰国','Philippines':'菲律宾',
-  'Indonesia':'印度尼西亚','Vietnam':'越南','Japan':'日本','South Korea':'韩国',
-  'China':'中国','India':'印度','Australia':'澳大利亚','New Zealand':'新西兰',
-  'United Kingdom':'英国','Germany':'德国','France':'法国','Netherlands':'荷兰',
-  'Ireland':'爱尔兰','Italy':'意大利','Spain':'西班牙','Poland':'波兰',
-  'United States':'美国','Canada':'加拿大','Brazil':'巴西','Mexico':'墨西哥',
-  'South Africa':'南非','Nigeria':'尼日利亚','Egypt':'埃及','UAE':'阿联酋',
-  'Saudi Arabia':'沙特阿拉伯','Turkey':'土耳其','Bangladesh':'孟加拉国','Sri Lanka':'斯里兰卡',
-  'Hong Kong':'中国香港','Taiwan':'中国台湾','Myanmar':'缅甸','Cambodia':'柬埔寨',
-  'Laos':'老挝','Pakistan':'巴基斯坦','Nepal':'尼泊尔','Qatar':'卡塔尔'
-};
-function populateCountryFilter() {
-  const sel = document.getElementById('filterCountry');
-  const countries = [...new Set(laborLawData.map(d => d.country))].sort();
-  sel.innerHTML = `<option value="" data-i18n="all">${t('all')}</option>` + countries.map(c => `<option value="${c}">${countryNameMap[c]||c}</option>`).join('');
-}
-
-// ============ HERO CHIPS ============
-function renderHeroChips() {
-  const regions = [
-    {val:'', label:t('all')},
-    {val:'Asia', label:'亚洲'},
-    {val:'Europe', label:'欧洲'},
-    {val:'Americas', label:'美洲'}
-  ];
-  document.getElementById('heroChips').innerHTML = regions.map(r => {
-    return `<div class="chip ${document.getElementById('filterRegion').value===r.val?'on':''}" onclick="document.getElementById('filterRegion').value='${r.val}';applyFilters();renderHeroChips()">${r.label}</div>`;
-  }).join('');
-}
-
-// ============ TIMELINE ============
-function renderTimeline() {
-  const el = document.getElementById('timeline');
-  // Use effectiveDate for timeline grouping (when law actually takes effect)
-  // Filter to last 3 years only
-  const threeYearsAgo = new Date();
-  threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
-  const recentData = filteredData.filter(item => {
-    const d = new Date(item.effectiveDate);
-    return d >= threeYearsAgo;
-  });
-  // Group by effectiveDate (year-month)
-  const grouped = {};
-  recentData.forEach(item => {
-    const d = new Date(item.effectiveDate);
-    const year = d.getFullYear();
-    const month = d.toLocaleString('en',{month:'short'}).toUpperCase();
-    const key = `${year}-${month}`;
-    if (!grouped[key]) grouped[key] = { year, month, items: [] };
-    grouped[key].items.push(item);
-  });
-  const months = Object.values(grouped);
-  if (months.length === 0) {
-    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3)">No recent updates in the last 3 years</div>';
-    return;
-  }
-  el.innerHTML = months.map(g => `
-    <div class="tl-group">
-      <div class="tl-year">${g.year}</div>
-      <div class="tl-month">${g.month}</div>
-      ${g.items.map(item => `
-        <div class="tl-card ${item.importance} ${expandedCard===item.id?'exp':''}" onclick="toggleTlCard('${item.id}')">
-          <div class="tl-top">
-            <span class="tl-flag">${item.flag}</span>
-            <span class="tl-country">${countryNameMap[item.country]||item.country}</span>
-            <span class="tl-date">${item.effectiveDate}</span>
-          </div>
-          <div class="tl-law">${item.lawName}</div>
-          <div class="tl-article">${t('article')}: ${item.article}</div>
-          <div class="tl-summary">${currentLang==='en'?(item.summary_en||item.chineseTranslation):item.chineseTranslation}</div>
-          <div class="tl-tags">
-            <span class="tl-tag mod">${item.category}</span>
-          </div>
-          <div class="tl-detail">
-            <h4>${t('aiSummary')}</h4>
-            <p>${currentLang==='en'?(item.summary_en||item.chineseTranslation):item.chineseTranslation}</p>
-            <div class="rec">💡 ${currentLang==='en'?(item.recommendation_en||item.recommendation):item.recommendation||''}</div>
-            <div style="margin-top:6px;font-size:0.62rem;color:var(--text3)">${t('effective')}: ${item.effectiveDate}</div>
-            <div style="margin-top:4px"><a href="${item.officialUrl}" target="_blank" style="color:var(--accent);font-size:0.65rem;text-decoration:none">${t('officialSource')} ↗</a></div>
-          </div>
-        </div>`).join('')}
-    </div>`).join('');
-}
-function toggleTlCard(id) { selectedLawId = id; renderTimeline(); openDetail(id); }
-
-// ============ LAW CARDS (Library) ============
-function renderLawCards() {
-  const el = document.getElementById('lawCards');
-  const count = libraryData.length;
-  document.getElementById('libCount').textContent = `${count} ${t('laws')}`;
-  const isEn = currentLang === 'en' || currentLang === 'es';
-  if (count === 0) {
-    el.innerHTML = `<div class="lib-empty">${isEn?'No laws match the current filters':'没有匹配当前筛选条件的法规'}</div>`;
-    return;
-  }
-  el.innerHTML = libraryData.map(item => {
-    const summary = isEn ? (item.originalText || item.chineseTranslation) : item.chineseTranslation;
-    // Determine status: Active if effective date is in the past, Amended if updated recently
-    const effDate = new Date(item.effectiveDate);
-    const now = new Date();
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    const status = effDate <= now ? 'Active' : 'Pending';
-    const statusClass = effDate <= now ? 'active' : 'amended';
-    return `<div class="law-card ${item.importance} ${selectedLawId===item.id?'active':''}" onclick="openDetail('${item.id}')">
-      <div class="lc-top">
-        <span class="lc-flag">${item.flag}</span>
-        <span class="lc-country">${countryNameMap[item.country]||item.country}</span>
-      </div>
-      <div class="lc-title">${item.lawName}</div>
-      <div class="lc-meta">
-        <span>📅 ${item.effectiveDate}</span>
-        <span>📋 ${item.category}</span>
-      </div>
-      <div class="lc-summary">${summary}</div>
-      <div class="lc-footer">
-        <span class="lc-status ${statusClass}">${isEn?(statusClass==='active'?'Active':'Pending'):(statusClass==='active'?'生效中':'待生效')}</span>
-        <span class="lc-link">${isEn?'View Details →':'查看详情 →'}</span>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ============ DETAIL OVERLAY ============
-function openDetail(id) {
-  const item = laborLawData.find(d => d.id === id);
-  if (!item) return;
-  selectedLawId = id;
-  const ai = aiMonitorData.find(a => a.country === item.country);
-  const isEn = currentLang === 'en' || currentLang === 'es';
-  document.getElementById('detailContent').innerHTML = `
-    <div class="dp-grid">
-      <div class="dp-section">
-        <h4>📄 ${isEn?'Basic Information':'基本信息'}</h4>
-        <div class="dp-row"><div class="dp-label">${isEn?'Country':'国家'}</div><div class="dp-val">${item.flag} ${countryNameMap[item.country]||item.country}</div></div>
-        <div class="dp-row"><div class="dp-label">${isEn?'Law Title':'法律名称'}</div><div class="dp-val" style="font-weight:700">${item.lawName}</div></div>
-        <div class="dp-row"><div class="dp-label">${isEn?'Article':'条款'}</div><div class="dp-val">${item.article}</div></div>
-        <div class="dp-row"><div class="dp-label">${isEn?'Effective':'生效日期'}</div><div class="dp-val">${item.effectiveDate}</div></div>
-        <div class="dp-row"><div class="dp-label">${isEn?'Category':'类别'}</div><div class="dp-val">${item.category}</div></div>
-        <div class="dp-row"><div class="dp-label">${isEn?'Original Text':'原文'}</div><div class="dp-val" style="font-size:0.7rem;color:var(--text2)">${item.originalText}</div></div>
-        <div class="dp-row"><div class="dp-label">${isEn?'Translation':'中文翻译'}</div><div class="dp-val" style="font-size:0.7rem;color:var(--text2)">${item.chineseTranslation}</div></div>
-        <div class="dp-row"><div class="dp-label">${isEn?'Official Source':'官方来源'}</div><div class="dp-val"><a href="${item.officialUrl}" target="_blank">${isEn?'View Original Source →':'查看官方来源 ↗'}</a></div></div>
-        ${countryDetailPages[item.country] ? `<button class="btn-fullview" onclick="openCountryPage('${item.country}','${item.flag}')">📖 ${isEn?'View Full Country Law Page':'查看完整国家法规页面'}</button>` : ''}
-      </div>
-    </div>`;
-  document.getElementById('detailOverlay').classList.add('open');
-  document.getElementById('detailPanel').classList.add('open');
-  renderLawCards();
-}
-function closeDetail() {
-  document.getElementById('detailOverlay').classList.remove('open');
-  document.getElementById('detailPanel').classList.remove('open');
-}
-
-// ============ RIGHT PANEL ============
-function renderRightPanel() {
-  const total = filteredData.length;
-  const countries = new Set(filteredData.map(d => d.country)).size;
-  const cats = new Set(filteredData.map(d => d.category)).size;
-  const dates = filteredData.map(d => d.lastUpdated).sort();
-  const last = dates[dates.length - 1] || '-';
-  document.getElementById('kTotal').textContent = total;
-  document.getElementById('kCountries').textContent = countries;
-  document.getElementById('kCats').textContent = cats;
-  document.getElementById('kUpdated').textContent = last;
-
-  // Upcoming dates
-  const now = new Date();
-  const upcoming = filteredData.filter(d => new Date(d.effectiveDate) > now).sort((a,b) => new Date(a.effectiveDate) - new Date(b.effectiveDate)).slice(0, 5);
-  document.getElementById('upcomingList').innerHTML = upcoming.map(item => `
-    <div class="upcoming-item">
-      <div style="display:flex;align-items:center;gap:6px"><span>${item.flag}</span><strong>${countryNameMap[item.country]||item.country}</strong> — ${item.lawName}</div>
-      <div class="upcoming-date">${t('effective')}: ${item.effectiveDate}</div>
-    </div>`).join('') || '<div style="font-size:0.68rem;color:var(--text3);padding:8px 0">No upcoming dates</div>';
-}
-
-// ============ NOTIFICATIONS ============
-function renderNotifications() {
-  const el = document.getElementById('notifBody');
-  const today = new Date().toISOString().slice(0,10);
-  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
-  const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
-  const groups = { today:[], yesterday:[], thisWeek:[], earlier:[] };
-  notifData.forEach(n => {
-    if (n.date >= today) groups.today.push(n);
-    else if (n.date >= yesterday) groups.yesterday.push(n);
-    else if (n.date >= weekAgo) groups.thisWeek.push(n);
-    else groups.earlier.push(n);
-  });
-  const labels = { today:t('today'), yesterday:t('yesterday'), thisWeek:t('thisWeek'), earlier:t('earlier') };
-  el.innerHTML = Object.entries(groups).filter(([,v])=>v.length).map(([k,items]) => `
-    <div class="notif-group-label">${labels[k]}</div>
-    ${items.map(n => `
-      <div class="notif-item" onclick="onNotifClick('${n.country}')">
-        <span class="ni-flag">${n.flag}</span>
-        <div class="ni-body">
-          <div class="ni-title">${n.title}</div>
-          <div class="ni-sub">${n.summary}</div>
-          <div class="ni-date">${n.date} · ${n.effective}</div>
-        </div>
-        ${n.isNew?'<span class="ni-badge">NEW</span>':''}
-      </div>`).join('')}`).join('');
-}
-function toggleNotifPanel() { document.getElementById('notifPanel').classList.toggle('open'); }
-function onNotifClick(country) {
-  document.getElementById('filterCountry').value = country;
-  document.getElementById('notifPanel').classList.remove('open');
-  applyFilters();
-  renderHeroChips();
-  flyToCountryByName(country);
-}
-
-// ============ DRAWER ============
-function openDrawer(id) {
-  const item = laborLawData.find(d => d.id === id);
-  if (!item) return;
-  const ai = aiMonitorData.find(a => a.country === item.country);
-  const lang = currentLang;
-  document.getElementById('drawerContent').innerHTML = `
-    <h2>${item.flag} ${countryNameMap[item.country]||item.country} — ${item.lawName}</h2>
-    <div class="field"><div class="field-label">${t('article')}</div><div class="field-value">${item.article}</div></div>
-    <div class="field"><div class="field-label">${t('原文')}</div><div class="field-value">${item.originalText}</div></div>
-    <div class="field"><div class="field-label">${t('中文翻译')}</div><div class="field-value">${item.chineseTranslation}</div></div>
-    <div class="field"><div class="field-label">${t('effective')}</div><div class="field-value">${item.effectiveDate}</div></div>
-    ${ai ? `<div class="field"><div class="field-label">🤖 ${t('aiSummary')}</div><div class="field-value">${lang==='en'?(ai.summary_en||ai.summary):ai.summary}</div></div>
-    <div class="field"><div class="field-label">💡 ${t('aiRecommendation')}</div><div class="field-value" style="border-left:3px solid var(--accent);padding-left:8px">${lang==='en'?(ai.recommendation_en||ai.recommendation):ai.recommendation}</div></div>` : ''}
-    <div class="field"><a href="${item.officialUrl}" target="_blank" class="hbtn" style="text-decoration:none;display:inline-flex;margin-top:8px">${t('officialSource')} ↗</a></div>
-  `;
-  document.getElementById('drawerOverlay').classList.add('open');
-  document.getElementById('drawer').classList.add('open');
-}
-function closeDrawer() { document.getElementById('drawerOverlay').classList.remove('open'); document.getElementById('drawer').classList.remove('open'); }
-
-// ============ SETTINGS ============
-function openSettings() { document.getElementById('settingsOverlay').classList.add('open'); document.getElementById('apiKeyInput').value = localStorage.getItem('laborLawApiKey')||''; }
-function closeSettings() { document.getElementById('settingsOverlay').classList.remove('open'); }
-function saveSettings() {
-  localStorage.setItem('laborLawApiKey', document.getElementById('apiKeyInput').value);
-  const lang = document.getElementById('settingsLang').value;
-  if (lang !== currentLang) switchLang(lang);
-  showToast(t('save') + ' ✓');
-  closeSettings();
-}
-
-// ============ TOAST ============
-function showToast(msg) { const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2500); }
-
-// ============ 3D GLOBE ============
-const regionColors = {Asia:'#3b82f6',Europe:'#10b981',Americas:'#f59e0b',Africa:'#ef4444',Oceania:'#8b5cf6'};
-const regionNames = {Asia:'亚洲',Europe:'欧洲',Americas:'美洲',Africa:'非洲',Oceania:'大洋洲'};
-const regionNamesEn = {Asia:'Asia',Europe:'Europe',Americas:'Americas',Africa:'Africa',Oceania:'Oceania'};
-function getRegionName(r) { return currentLang==='en'||currentLang==='es' ? (regionNamesEn[r]||r) : (regionNames[r]||r); }
-const globeCountries = [
-  {name:'Japan',flag:'🇯🇵',lat:36.2,lon:138.2,region:'Asia'},{name:'South Korea',flag:'🇰🇷',lat:35.9,lon:127.8,region:'Asia'},
-  {name:'China',flag:'🇨🇳',lat:35.9,lon:104.2,region:'Asia'},{name:'Singapore',flag:'🇸🇬',lat:1.35,lon:103.8,region:'Asia'},
-  {name:'Vietnam',flag:'🇻🇳',lat:14.1,lon:108.3,region:'Asia'},{name:'Malaysia',flag:'🇲🇾',lat:4.2,lon:108.0,region:'Asia'},
-  {name:'Indonesia',flag:'🇮🇩',lat:-0.8,lon:113.9,region:'Asia'},{name:'India',flag:'🇮🇳',lat:20.6,lon:79.0,region:'Asia'},
-  {name:'Thailand',flag:'🇹🇭',lat:15.9,lon:100.9,region:'Asia'},
-  {name:'Germany',flag:'🇩🇪',lat:51.2,lon:10.5,region:'Europe'},{name:'France',flag:'🇫🇷',lat:46.6,lon:2.2,region:'Europe'},
-  {name:'United Kingdom',flag:'🇬🇧',lat:55.4,lon:-3.4,region:'Europe'},{name:'Italy',flag:'🇮🇹',lat:41.9,lon:12.6,region:'Europe'},
-  {name:'Spain',flag:'🇪🇸',lat:40.5,lon:-3.7,region:'Europe'},{name:'Netherlands',flag:'🇳🇱',lat:52.1,lon:5.3,region:'Europe'},
-  {name:'Sweden',flag:'🇸🇪',lat:60.1,lon:18.6,region:'Europe'},{name:'Poland',flag:'🇵🇱',lat:51.9,lon:19.1,region:'Europe'},
-  {name:'United States',flag:'🇺🇸',lat:37.1,lon:-95.7,region:'Americas'},{name:'Canada',flag:'🇨🇦',lat:56.1,lon:-106.3,region:'Americas'},
-  {name:'Brazil',flag:'🇧🇷',lat:-14.2,lon:-51.9,region:'Americas'},{name:'Mexico',flag:'🇲🇽',lat:23.6,lon:-102.6,region:'Americas'},
-  {name:'South Africa',flag:'🇿🇦',lat:-30.6,lon:22.9,region:'Africa'},
-  {name:'Australia',flag:'🇦🇺',lat:-25.3,lon:133.8,region:'Oceania'}
-];
-
-// ============ COUNTRY NAME -> ISO3 (matches world.geo.json feature ids) ============
-const countryToISO3 = {
-  'Japan':'JPN','South Korea':'KOR','China':'CHN','Singapore':'SGP','Vietnam':'VNM','Malaysia':'MYS',
-  'Indonesia':'IDN','India':'IND','Thailand':'THA','Germany':'DEU','France':'FRA','United Kingdom':'GBR',
-  'Italy':'ITA','Spain':'ESP','Netherlands':'NLD','Sweden':'SWE','Poland':'POL','United States':'USA',
-  'Canada':'CAN','Brazil':'BRA','Mexico':'MEX','South Africa':'ZAF','Australia':'AUS'
-};
-const iso3ToCountry = {}; Object.entries(countryToISO3).forEach(([n,i])=>iso3ToCountry[i]=n);
-function lawCount(country){ return laborLawData.filter(d=>d.country===country).length; }
-function regionOf(country){ const c=globeCountries.find(x=>x.name===country); return c?c.region:null; }
-
-// ============ LEAFLET MAP (Google/Apple Maps style) ============
-let lmap=null, lgeo=null, lselected=null, ltiles=null;
-const WORLD_VIEW={center:[22,12],zoom:1};
-function tileUrl(){ return getTheme()==='dark'
-  ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-  : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'; }
-function refreshMapTiles(){ if(!lmap) return; if(ltiles) lmap.removeLayer(ltiles); ltiles=L.tileLayer(tileUrl(),{subdomains:'abcd',maxZoom:19}).addTo(lmap); if(lgeo) lgeo.bringToFront(); }
-
-function mapBaseStyle(feature){
-  const iso=feature.id||feature.properties.iso_a3||'';
-  const country=iso3ToCountry[iso];
-  if(country){
-    return {fillColor:regionColors[regionOf(country)]||'#3b82f6',fillOpacity:0.7,color:'#fff',weight:1};
-  }
-  return {fillColor:'#c9d4e0',fillOpacity:0.22,color:'#fff',weight:0.5};
-}
-
-// Public entry point (kept name so init()/toggleTheme() keep working)
-function renderGlobe(){
-  if(typeof L==='undefined'){document.getElementById('leafletMap').innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)">地图需要网络连接</div>';return;}
-  if(lmap){ setTimeout(()=>lmap.invalidateSize(),100); return; }
-  try{
-    lmap=L.map('leafletMap',{center:WORLD_VIEW.center,zoom:WORLD_VIEW.zoom,minZoom:1,maxZoom:10,
-      worldCopyJump:true,zoomControl:true,attributionControl:false,zoomAnimation:true,fadeAnimation:true,inertia:true});
-    ltiles=L.tileLayer(tileUrl(),{subdomains:'abcd',maxZoom:19}).addTo(lmap);
-    loadCountriesGeoJSON();
-    // Region legend (reuses .gleg styling + filterByRegion)
-    document.getElementById('globeLegend').innerHTML=Object.entries(regionColors).map(([r,c])=>
-      `<span class="gleg" onclick="filterByRegion('${r}')"><span class="gdot" style="background:${c}"></span>${getRegionName(r)}</span>`).join('');
-    setTimeout(()=>lmap.invalidateSize(),300);
-    window.addEventListener('resize',()=>lmap&&lmap.invalidateSize());
-  }catch(e){console.warn('Leaflet init failed:',e);}
-}
-
-function loadCountriesGeoJSON(){
-  fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
-    .then(r=>r.json())
-    .then(data=>addCountriesLayer(data))
-    .catch(()=>{ document.getElementById('leafletMap').insertAdjacentHTML('beforeend',
-      '<div style="position:absolute;bottom:8px;left:8px;font-size:0.6rem;color:var(--text3)">地图边界加载失败</div>'); });
-}
-
-function addCountriesLayer(data){
-  lgeo=L.geoJSON(data,{
-    style:mapBaseStyle,
-    onEachFeature:function(feature,layer){
-      const iso=feature.id||feature.properties.iso_a3||'';
-      const country=iso3ToCountry[iso];
-      const count=country?lawCount(country):0;
-      layer._country=country; layer._count=count; layer._iso=iso;
-      if(country){
-        layer.bindTooltip(`${country}（${count} ${t('laws')}）`,{className:'map-tip',sticky:true});
-        layer.on('mouseover',function(){ if(layer===lselected)return; this.setStyle({fillColor:'#f97316',fillOpacity:0.9,weight:2,color:'#ea580c'}); this.bringToFront(); });
-        layer.on('mouseout',function(){ if(layer===lselected)return; lgeo.resetStyle(this); });
-        layer.on('click',function(){ focusCountryLayer(layer); });
-      } else {
-        layer.on('mouseover',function(){ this.setStyle({fillOpacity:0.4}); });
-        layer.on('mouseout',function(){ if(layer!==lselected) lgeo.resetStyle(this); });
-      }
-    }
-  }).addTo(lmap);
-}
-
-// Smoothly fly & zoom to a country (Google/Apple Maps style), no page reload
-function focusCountryLayer(layer){
-  if(lselected && lselected!==layer) lgeo.resetStyle(lselected);
-  lselected=layer;
-  layer.setStyle({fillColor:'#3b82f6',fillOpacity:0.95,weight:2.5,color:'#1d4ed8'});
-  layer.bringToFront();
-  lmap.flyToBounds(layer.getBounds(),{padding:[20,20],duration:1.25,easeLinearity:0.25,maxZoom:6});
-  // UI: return button + info chip
-  document.getElementById('mapReturnBtn').classList.add('show');
-  const chip=document.getElementById('mapChip');
-  const c=globeCountries.find(x=>x.name===layer._country);
-  document.getElementById('mcName').textContent=`${c?c.flag+' ':''}${layer._country||layer._iso}`;
-  document.getElementById('mcCount').textContent=`${layer._count} ${t('laws')}`;
-  chip.classList.add('show');
-  // Sync filters (guarded so we don't re-fly)
-  window._mapDriven=true;
-  selectedCountry=layer._country;
-  const fc=document.getElementById('filterCountry'); if(fc){ fc.value=layer._country||''; }
-  applyFilters(); renderHeroChips();
-  window._mapDriven=false;
-}
-
-// Return to default world view with continuous animation
-function returnToWorldView(){
-  if(lselected){ lgeo.resetStyle(lselected); lselected=null; }
-  if(lmap) lmap.flyTo(WORLD_VIEW.center,WORLD_VIEW.zoom,{duration:1.1,easeLinearity:0.25});
-  document.getElementById('mapReturnBtn').classList.remove('show');
-  document.getElementById('mapChip').classList.remove('show');
-  window._mapDriven=true;
-  selectedCountry='';
-  const fc=document.getElementById('filterCountry'); if(fc) fc.value='';
-  applyFilters(); renderHeroChips();
-  window._mapDriven=false;
-}
-
-// ---- Compatibility API (used by notifications / hero chips / filters) ----
-// Called when a country is chosen elsewhere -> fly the map to it.
-function selectGlobeCountry(country){
-  selectedCountry=country;
-  document.getElementById('filterCountry').value=country;
-  applyFilters(); renderHeroChips();
-  flyToCountryByName(country);
-}
-function flyToCountryByName(country){
-  if(!lgeo) return;
-  const iso=countryToISO3[country];
-  let target=null;
-  lgeo.eachLayer(l=>{ if(l._country===country || l._iso===iso) target=l; });
-  if(target) focusCountryLayer(target);
-}
-// Region legend / hero chip -> filter + fit region bounds smoothly.
-function filterByRegion(region){
-  document.getElementById('filterRegion').value=region;
-  applyFilters(); renderHeroChips();
-  if(!lmap||!lgeo) return;
-  const layers=[]; lgeo.eachLayer(l=>{ if(l._country && regionOf(l._country)===region) layers.push(l); });
-  if(layers.length){
-    let b=layers[0].getBounds(); layers.slice(1).forEach(l=>b.extend(l.getBounds()));
-    if(lselected){ lgeo.resetStyle(lselected); lselected=null; }
-    lmap.flyToBounds(b,{padding:[15,15],duration:1.1,maxZoom:4});
-    document.getElementById('mapReturnBtn').classList.add('show');
-    document.getElementById('mapChip').classList.remove('show');
-  }
-}
-// Country dropdown change -> filter + fly map (or return to world if cleared)
-function onCountrySelectChange(){
-  const val=document.getElementById('filterCountry').value;
-  applyFilters();
-  if(val){ flyToCountryByName(val); }
-  else { returnToWorldView(); }
-}
-// No-op kept for legacy callers.
-function animateCamera(){}
-
-// ============ URL PARAMETER HANDLING (link from portal.html) ============
-// Portal region grouping -> underlying data filter.
-// 亚太=Asia+Oceania, 中东非=Africa, 欧洲=Europe, 南亚=India(country)
-const PORTAL_REGION_MAP = {
-  'apac':   { region:'Asia' },
-  'mea':    { region:'Africa' },
-  'europe': { region:'Europe' },
-  'sasia':  { country:'India' }
-};
-// Business node -> tree subcategory keyword used by applyFilters()
-const PORTAL_BUSINESS_MAP = {
-  'recruit':  { subcategory:'' },            // 招聘 (no strict law category; keep broad)
-  'payroll':  { subcategory:'工资' },        // 薪酬
-  'relations':{ subcategory:'劳动合同' },    // 员工关系
-  'training': { subcategory:'' }             // 培训
-};
-function applyUrlParams(){
-  const p = new URLSearchParams(window.location.search);
-  if(![...p.keys()].length) return;
-
-  // search text
-  const search = p.get('search') || p.get('q');
-  if(search){ const el=document.getElementById('searchInput'); if(el) el.value=search; }
-
-  // direct country
-  let country = p.get('country');
-
-  // region: accept raw data region (Asia/Europe/...) or portal group (apac/mea/europe/sasia)
-  const regionRaw = p.get('region');
-  if(regionRaw){
-    const mapped = PORTAL_REGION_MAP[regionRaw.toLowerCase()];
-    if(mapped){
-      if(mapped.region){ const el=document.getElementById('filterRegion'); if(el) el.value=mapped.region; }
-      if(mapped.country && !country){ country = mapped.country; }
-    } else {
-      const el=document.getElementById('filterRegion'); if(el) el.value=regionRaw;
-    }
-  }
-
-  if(country){ const el=document.getElementById('filterCountry'); if(el) el.value=country; }
-
-  // business node -> 同步到业务节点下拉筛选（级联）
-  const biz = p.get('business') || p.get('node');
-  if(biz){
-    // portal 业务键 -> 业务节点下拉值
-    const bizToDropdown = { 'recruit':'招聘', 'relations':'员工关系', 'training':'培训发展', 'payroll':'薪酬管理' };
-    const bizVal = bizToDropdown[biz.toLowerCase()];
-    if(bizVal){
-      const bizEl=document.getElementById('filterBiz'); if(bizEl) bizEl.value=bizVal;
-      const subEl=document.getElementById('filterBizSub');
-      if(subEl){ subEl.style.display = (bizVal==='薪酬管理') ? '' : 'none'; if(bizVal!=='薪酬管理') subEl.value=''; }
-    }
-  }
-
-  // category passthrough (raw law category)
-  const cat = p.get('category');
-  if(cat){ currentCategory=''; currentSubcategory=cat; currentBusinessNode=''; }
-}
-
-// If a country was preselected (URL param / portal link), fly the map to it once GeoJSON is ready.
-function deferInitialFly(){
-  const c=document.getElementById('filterCountry')?.value;
-  if(!c) return;
-  let tries=0;
-  (function wait(){
-    if(lgeo){ flyToCountryByName(c); return; }
-    if(tries++>40) return; // ~8s max
-    setTimeout(wait,200);
-  })();
-}
-
-// ============ INIT ============
-function init(){
-  try{populateCountryFilter();}catch(e){console.warn('populateCountryFilter:',e);}
-  try{renderTree();}catch(e){console.warn('renderTree:',e);}
-  try{applyUrlParams();}catch(e){console.warn('applyUrlParams:',e);}
-  try{renderGlobe();}catch(e){console.warn('renderGlobe:',e);}
-  try{renderHeroChips();}catch(e){console.warn('renderHeroChips:',e);}
-  try{applyFilters();}catch(e){console.warn('applyFilters:',e);}
-  try{renderNotifications();}catch(e){console.warn('renderNotifications:',e);}
-  try{deferInitialFly();}catch(e){console.warn('deferInitialFly:',e);}
-}
-// ============ COUNTRY DETAIL PAGES ============
-const countryDetailPages = {
-  'Malaysia': 'malaysia_labor_law.html',
-  '马来西亚': 'malaysia_labor_law.html'
-};
-function openCountryPage(country, flag) {
-  const url = countryDetailPages[country];
-  if (!url) return;
-  const isEn = currentLang === 'en' || currentLang === 'es';
-  const modal = document.getElementById('countryModal');
-  document.getElementById('countryModalTitle').innerHTML = `${flag||''} <span>${isEn?'Full Law Page':'完整法规页面'}</span> — ${country}`;
-  document.getElementById('countryModalIframe').src = url;
-  modal.classList.add('open');
-}
-function closeCountryPage() {
-  const modal = document.getElementById('countryModal');
-  modal.classList.remove('open');
-  document.getElementById('countryModalIframe').src = '';
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCountryPage(); });
-
-// ============ LATEST REGULATION TICKER MODULE ============
-function renderTicker() {
-  const track = document.getElementById('tickerTrack');
-  if (!track) return;
-  const twoYearsAgo = new Date();
-  twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
-  const now = new Date();
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-  const recentData = laborLawData
-    .filter(item => new Date(item.effectiveDate) >= twoYearsAgo)
-    .sort((a, b) => new Date(b.effectiveDate) - new Date(a.effectiveDate));
-
-  if (recentData.length === 0) { track.innerHTML = '<div style="padding:12px 20px;color:var(--text3);font-size:0.75rem">暂无更新</div>'; return; }
-
-  function buildCards() {
-    return recentData.map(item => {
-      const isNew = new Date(item.effectiveDate) >= thirtyDaysAgo;
-      const cn = countryNameMap[item.country] || item.country;
-      return `<div class="ticker-card" onclick="openDetail('${item.id}')">
-        <span class="tc-flag">${item.flag}</span>
-        <span class="tc-country">${cn}</span>
-        <span class="tc-sep">·</span>
-        <span class="tc-cat">${item.category}</span>
-        <span class="tc-title">${item.lawName}</span>
-        <span class="tc-date">${item.effectiveDate}</span>
-        ${isNew ? '<span class="tc-new">NEW</span>' : ''}
-      </div>`;
-    }).join('');
-  }
-
-  const viewAllHtml = '<div class="ticker-viewall" onclick="document.querySelector(\'#libraryPanel\')?.scrollIntoView({behavior:\'smooth\'})">View All Updates →</div>';
-  track.innerHTML = buildCards() + viewAllHtml + buildCards() + viewAllHtml;
-  track.classList.add('auto');
-}
-
-// Pause ticker on hover
-document.addEventListener('DOMContentLoaded', () => {
-  const wrap = document.querySelector('.latest-ticker-track-wrap');
-  if (!wrap) return;
-  const track = document.getElementById('tickerTrack');
-  wrap.addEventListener('mouseenter', () => { if (track) track.style.animationPlayState = 'paused'; });
-  wrap.addEventListener('mouseleave', () => { if (track) track.style.animationPlayState = 'running'; });
-});
-
-init();
-setTimeout(renderTicker, 100);
-</script>
-<!-- COUNTRY FULL VIEW MODAL -->
 <div class="country-modal" id="countryModal">
   <div class="country-modal-bar">
     <h3 id="countryModalTitle">📖</h3>
-    <button class="country-modal-close" onclick="closeCountryPage()">✕ 关闭</button>
+    <button class="country-modal-close" onclick="closeCountryPage()">✕ Close</button>
   </div>
   <iframe id="countryModalIframe" src=""></iframe>
 </div>
+
+<div id="toast"></div>
+<script>
+const laborLawData=[
+{id:"au01",country:"Australia",countryCode:"AU",region:"Oceania",flag:"🇦🇺",law:"Fair Work Act 2009 – Modern Awards Update",category:"Working Time",subCategory:"Working Time",summary:"Annual review of Modern Awards requiring employers to update minimum wages, overtime rates, penalty rates, and allowances.",summaryZh:"公平工作委员会年度审查现代奖标准，要求雇主更新最低工资、加班费率、惩罚性费率和津贴。",status:"effective",effectiveDate:"2026-07-01",lastUpdated:"2026-07-15",source:"https://www.fwc.gov.au",changes:["Minimum wage increased by 3.5%","Penalty rates adjusted for weekends","New allowance for remote workers"],hrImpact:["Payroll systems must be updated","Employment contracts requiring review","Pay slip templates need revision"],modules:["薪酬管理","工时与加班"]},
+{id:"au02",country:"Australia",countryCode:"AU",region:"Oceania",flag:"🇦🇺",law:"Closing Loopholes Act – Gig Economy Provisions",category:"Employee Rights",subCategory:"Employee Benefits",summary:"New provisions extending employee-like protections to gig economy workers including minimum earnings, insurance, and right to disconnect.",summaryZh:"新条款将类雇员保护扩展至零工经济工人，包括最低收入、保险覆盖和断开连接权。",status:"effective",effectiveDate:"2026-08-01",lastUpdated:"2026-07-20",source:"https://www.legislation.gov.au",changes:["Gig workers entitled to minimum earnings","Right to disconnect after hours","Insurance requirements for platform workers"],hrImpact:["Gig workforce classification review","Budget allocation for new compliance","Platform worker policy updates"],modules:["员工关系","薪酬管理"]},
+{id:"de01",country:"Germany",countryCode:"DE",region:"Europe",flag:"🇩🇪",law:"Arbeitszeitgesetz – Working Time Recording",category:"Working Time",subCategory:"Working Time",summary:"Mandatory electronic recording of all working hours as per Federal Labour Court ruling.",summaryZh:"根据联邦劳动法院裁决，强制电子记录所有工作时间。",status:"effective",effectiveDate:"2026-01-01",lastUpdated:"2026-06-10",source:"https://www.gesetze-im-internet.de",changes:["Electronic time tracking mandatory","Daily rest period of 11 hours","Weekly maximum 48 hours enforced"],hrImpact:["Time tracking system implementation","Workforce scheduling optimization","Overtime monitoring required"],modules:["工时与加班","员工关系"]},
+{id:"de02",country:"Germany",countryCode:"DE",region:"Europe",flag:"🇩🇪",law:"LkSG – Supply Chain Due Diligence",category:"Compliance",subCategory:"Employee Benefits",summary:"Expanded supply chain due diligence obligations requiring companies to ensure human rights and environmental standards.",summaryZh:"扩大的供应链尽职调查义务，要求公司确保人权和环境标准。",status:"effective",effectiveDate:"2026-03-01",lastUpdated:"2026-06-05",source:"https://www.bafa.de",changes:["Expanded scope to 1000+ employees","Enhanced grievance mechanisms","Third-party audit requirements"],hrImpact:["Supply chain HR audit protocols","Vendor compliance verification","Training program for procurement"],modules:["员工关系"]},
+{id:"fr01",country:"France",countryCode:"FR",region:"Europe",flag:"🇫🇷",law:"Code du travail – Right to Disconnect",category:"Working Time",subCategory:"Working Time",summary:"Strengthened right to disconnect requiring companies with 50+ employees to establish formal policies.",summaryZh:"加强断开连接权执行，要求50人以上公司制定正式政策。",status:"active",effectiveDate:"2026-04-01",lastUpdated:"2026-05-15",source:"https://www.legifrance.gouv.fr",changes:["Mandatory disconnect policy for 50+ staff","Annual negotiation on digital usage","Penalties for non-compliance"],hrImpact:["Policy documentation required","Manager training on boundaries","IT system configuration changes"],modules:["工时与加班","员工关系"]},
+{id:"fr02",country:"France",countryCode:"FR",region:"Europe",flag:"🇫🇷",law:"Loi sur les Salaires – Minimum Wage Indexation",category:"Minimum Wage",subCategory:"Minimum Wage",summary:"Automatic minimum wage (SMIC) adjustment based on inflation index at €11.88/hour.",summaryZh:"基于通胀指数自动调整最低工资（SMIC），每小时11.88欧元。",status:"effective",effectiveDate:"2026-01-01",lastUpdated:"2026-04-01",source:"https://www.service-public.fr",changes:["SMIC increased to €11.88/hour","Quarterly indexation mechanism","Youth wage convergence accelerated"],hrImpact:["Payroll adjustment required","Budget impact assessment","Contract amendment notifications"],modules:["薪酬管理"]},
+{id:"gb01",country:"United Kingdom",countryCode:"GB",region:"Europe",flag:"🇬🇧",law:"Employment Rights Bill 2024 – Day One Rights",category:"Employee Rights",subCategory:"Employee Benefits",summary:"Major employment reform extending day-one rights including unfair dismissal protection and zero-hours contract reforms.",summaryZh:"重大就业改革，扩展第一天权利包括不当解雇保护和零小时合同改革。",status:"upcoming",effectiveDate:"2026-10-01",lastUpdated:"2026-07-10",source:"https://www.legislation.gov.uk",changes:["Day-one unfair dismissal rights","Statutory sick pay from day one","Zero-hours contract reform"],hrImpact:["Probation period policies revision","Sick pay budget increase","Zero-hours contract review"],modules:["离职与遣散","员工关系"]},
+{id:"gb02",country:"United Kingdom",countryCode:"GB",region:"Europe",flag:"🇬🇧",law:"National Living Wage Increase 2026",category:"Minimum Wage",subCategory:"Minimum Wage",summary:"National Living Wage increased to £12.21/hour for workers aged 21 and over.",summaryZh:"21岁及以上工人国家生活工资提高至每小时12.21英镑。",status:"effective",effectiveDate:"2026-04-01",lastUpdated:"2026-04-01",source:"https://www.gov.uk/national-minimum-wage",changes:["NLW increased to £12.21/hour","Apprentice rate aligned","Age threshold lowered to 21"],hrImpact:["Payroll system update","Budget reallocation","Apprentice contract updates"],modules:["薪酬管理"]},
+{id:"us01",country:"United States",countryCode:"US",region:"Americas",flag:"🇺🇸",law:"FLSA Overtime Rule 2026 – Salary Threshold",category:"Working Time",subCategory:"Working Time",summary:"Updated FLSA overtime rule raising salary threshold for exempt employees to $62,400 annually.",summaryZh:"更新的FLSA加班规则，将豁免员工工资门槛提高至每年$62,400。",status:"upcoming",effectiveDate:"2026-09-01",lastUpdated:"2026-07-15",source:"https://www.dol.gov",changes:["Salary threshold raised to $62,400","Executive/administrative exemption updated","Computer employee exemption adjusted"],hrImpact:["Employee reclassification analysis","Budget impact on overtime costs","HRIS data updates required"],modules:["工时与加班","薪酬管理"]},
+{id:"us02",country:"United States",countryCode:"US",region:"Americas",flag:"🇺🇸",law:"FTC Non-Compete Rule – Final Implementation",category:"Employee Rights",subCategory:"Employee Benefits",summary:"Federal ban on non-compete agreements taking full effect.",summaryZh:"联邦竞业禁止协议禁令全面生效。",status:"effective",effectiveDate:"2026-06-01",lastUpdated:"2026-06-01",source:"https://www.ftc.gov",changes:["Non-compete clauses banned","Existing non-competes unenforceable","Notice requirements to workers"],hrImpact:["Employment agreement overhaul","Competitive advantage protection","Trade secret safeguard review"],modules:["员工关系"]},
+{id:"ca01",country:"Canada",countryCode:"CA",region:"Americas",flag:"🇨🇦",law:"Canada Labour Code – Holiday Pay Equality",category:"Employee Benefits",subCategory:"Employee Benefits",summary:"New federal holiday pay rules ensuring proportional holiday pay for part-time and full-time employees.",summaryZh:"新的联邦假日工资规则，确保兼职和全职员工按比例获得假日工资。",status:"effective",effectiveDate:"2026-03-01",lastUpdated:"2026-03-15",source:"https://laws-lois.justice.gc.ca",changes:["Proportional holiday pay calculation","Part-time parity with full-time","30-day reference period"],hrImpact:["Payroll calculation update","Part-time worker communication","System configuration changes"],modules:["薪酬管理"]},
+{id:"br01",country:"Brazil",countryCode:"BR",region:"Americas",flag:"🇧🇷",law:"CLT Reform – Remote Work Regulations",category:"Working Time",subCategory:"Working Time",summary:"Comprehensive remote work framework with expense reimbursement, ergonomic standards, and digital time tracking.",summaryZh:"综合远程工作框架，包含费用报销、人体工程学标准和数字时间跟踪。",status:"effective",effectiveDate:"2026-02-15",lastUpdated:"2026-05-20",source:"https://www.planalto.gov.br",changes:["Home office expense reimbursement","Ergonomic assessment requirements","Digital time tracking mandate"],hrImpact:["Remote work policy creation","Expense reimbursement systems","Ergonomic compliance audit"],modules:["工时与加班","员工关系"]},
+{id:"jp01",country:"Japan",countryCode:"JP",region:"Asia",flag:"🇯🇵",law:"Work Style Reform 2.0 – Overtime Cap",category:"Working Time",subCategory:"Working Time",summary:"Second phase capping annual overtime at 960 hours, expanding equal pay for equal work.",summaryZh:"第二阶段将年度加班上限定为960小时，扩展同工同酬。",status:"effective",effectiveDate:"2026-04-01",lastUpdated:"2026-08-05",source:"https://www.mhlw.go.jp",changes:["Annual overtime cap at 960 hours","Equal pay for equal work expanded","36 agreement strengthened"],hrImpact:["Overtime monitoring system","Dispatch worker pay review","Manager compliance training"],modules:["工时与加班","薪酬管理"]},
+{id:"jp02",country:"Japan",countryCode:"JP",region:"Asia",flag:"🇯🇵",law:"Minimum Wage Increase 2026",category:"Minimum Wage",subCategory:"Minimum Wage",summary:"Nationwide minimum wage increase averaging 5.5%, Tokyo reaching ¥1,200/hour.",summaryZh:"全国最低工资平均提高5.5%，东京达到每小时1,200日元。",status:"effective",effectiveDate:"2026-10-01",lastUpdated:"2026-07-20",source:"https://www.mhlw.go.jp",changes:["National average increase 5.5%","Tokyo minimum ¥1,200/hour","Staggered regional implementation"],hrImpact:["Payroll system updates","Budget planning adjustment","Regional payroll differentiation"],modules:["薪酬管理"]},
+{id:"kr01",country:"South Korea",countryCode:"KR",region:"Asia",flag:"🇰🇷",law:"Work-Life Balance Enhancement Act",category:"Working Time",subCategory:"Working Time",summary:"Expanded regulations increasing annual leave to 25 days with parental leave transfer.",summaryZh:"扩展法规将年假增加至25天，引入育儿假转移。",status:"effective",effectiveDate:"2026-06-01",lastUpdated:"2026-06-15",source:"https://www.koreanlaw.go.kr",changes:["Annual leave increased to 25 days","Paid parental leave transfer","Overtime cap at 52 hours/week"],hrImpact:["Leave management system update","Parental leave policy revision","Overtime tracking enhancement"],modules:["休假类","工时与加班"]},
+{id:"kr02",country:"South Korea",countryCode:"KR",region:"Asia",flag:"🇰🇷",law:"Minimum Wage 2026",category:"Minimum Wage",subCategory:"Minimum Wage",summary:"National minimum wage set at ₩10,030/hour for 2026, a 2.5% increase.",summaryZh:"2026年全国最低工资设定为每小时10,030韩元，增长2.5%。",status:"upcoming",effectiveDate:"2026-09-01",lastUpdated:"2026-07-01",source:"https://www.koreanlaw.go.kr",changes:["Minimum wage ₩10,030/hour","2.5% increase from 2025","Sector-specific sub-minimums eliminated"],hrImpact:["Payroll system update required","Budget impact analysis","Employee notification"],modules:["薪酬管理"]},
+{id:"sg01",country:"Singapore",countryCode:"SG",region:"Asia",flag:"🇸🇬",law:"Employment Act – Progressive Wage Model",category:"Minimum Wage",subCategory:"Minimum Wage",summary:"Progressive Wage Model extended to retail, food services, and waste management.",summaryZh:"渐进式工资模式扩展至零售、餐饮服务和废物管理。",status:"effective",effectiveDate:"2026-03-01",lastUpdated:"2026-05-10",source:"https://www.mom.gov.sg",changes:["PWM extended to all sectors","Mandatory wage ladders","Skills framework integration"],hrImpact:["Salary structure redesign","Training budget allocation","Compliance reporting"],modules:["薪酬管理","培训发展"]},
+{id:"sg02",country:"Singapore",countryCode:"SG",region:"Asia",flag:"🇸🇬",law:"Workplace Fairness – Anti-Discrimination",category:"Anti-Discrimination",subCategory:"Anti-Discrimination",summary:"Comprehensive workplace fairness law prohibiting discrimination on 9 protected characteristics.",summaryZh:"全面工作场所公平法，禁止基于9项受保护特征的歧视。",status:"upcoming",effectiveDate:"2026-12-01",lastUpdated:"2026-07-01",source:"https://www.mom.gov.sg",changes:["9 protected characteristics defined","Employment tribunal enforcement","Mandatory workplace policies"],hrImpact:["Policy development required","Manager training programs","Complaint mechanism setup"],modules:["员工关系"]},
+{id:"in01",country:"India",countryCode:"IN",region:"Asia",flag:"🇮🇳",law:"Code on Wages 2019 – Full Implementation",category:"Minimum Wage",subCategory:"Minimum Wage",summary:"Full implementation unifying four labor laws, establishing national floor wage.",summaryZh:"全面实施统一四部劳动法，建立全国最低工资。",status:"upcoming",effectiveDate:"2026-09-01",lastUpdated:"2026-06-20",source:"https://www.indiacode.nic.in",changes:["Four labor codes unified","National floor wage established","Universal minimum wage applicability"],hrImpact:["Payroll system overhaul","Multi-state compliance review","Employee communication strategy"],modules:["薪酬管理"]},
+{id:"cn01",country:"China",countryCode:"CN",region:"Asia",flag:"🇨🇳",law:"Social Insurance Contribution Reform",category:"Social Insurance",subCategory:"Social Insurance",summary:"Revised rates reducing employer pension contribution from 20% to 16% with gig worker coverage.",summaryZh:"修订缴费比例将雇主养老金从20%降至16%，扩大零工覆盖。",status:"effective",effectiveDate:"2026-01-01",lastUpdated:"2026-03-01",source:"https://www.mohrss.gov.cn",changes:["Pension contribution reduced to 16%","Gig worker coverage expanded","Social insurance portability improved"],hrImpact:["Payroll calculation update","Budget reallocation","Gig worker classification"],modules:["法定缴费类","员工关系"]},
+{id:"cn02",country:"China",countryCode:"CN",region:"Asia",flag:"🇨🇳",law:"PIPL Employee Data Guidelines",category:"Data Privacy",subCategory:"Data Privacy",summary:"Enhanced employee data protection requiring explicit consent for cross-border transfers.",summaryZh:"加强员工数据保护，要求跨境传输明确同意。",status:"active",effectiveDate:"2026-04-01",lastUpdated:"2026-06-01",source:"https://www.cac.gov.cn",changes:["Explicit consent required","Cross-border transfer protocols","Biometric data protections"],hrImpact:["Privacy policy update","Consent form development","Data audit required"],modules:["数据保护","员工关系"]},
+{id:"ae01",country:"UAE",countryCode:"AE",region:"Asia",flag:"🇦🇪",law:"Labour Law Reform – Flexible Employment",category:"Employee Rights",subCategory:"Employee Benefits",summary:"Reformed law introducing flexible contracts, remote work provisions, and enhanced gratuity.",summaryZh:"改革劳动法引入灵活合同、远程工作条款和加强遣散费。",status:"effective",effectiveDate:"2026-03-01",lastUpdated:"2026-05-01",source:"https://www.mohre.gov.ae",changes:["Flexible employment contracts","Remote work legal framework","Enhanced gratuity calculation"],hrImpact:["Contract template update","Gratuity reserve recalculation","Remote work policy creation"],modules:["离职与遣散","员工关系"]},
+{id:"sa01",country:"Saudi Arabia",countryCode:"SA",region:"Asia",flag:"🇸🇦",law:"Labour Law – Saudization Updates",category:"Compliance",subCategory:"Employee Benefits",summary:"Updated Nitaqat quotas requiring increased Saudization in private sector.",summaryZh:"更新Nitaqat配额，要求私营部门增加沙特化。",status:"active",effectiveDate:"2026-06-01",lastUpdated:"2026-06-15",source:"https://www.hrsd.gov.sa",changes:["Increased Saudization quotas","New penalty structure","Compliance incentive program"],hrImpact:["Workforce planning adjustment","Recruitment strategy update","Reporting requirements"],modules:["员工关系","招聘"]},
+{id:"za01",country:"South Africa",countryCode:"ZA",region:"Africa",flag:"🇿🇦",law:"National Minimum Wage Act 2026",category:"Minimum Wage",subCategory:"Minimum Wage",summary:"National minimum wage increased to R28.50/hour with sectoral determinations.",summaryZh:"全国最低工资提高至每小时28.50兰特。",status:"effective",effectiveDate:"2026-03-01",lastUpdated:"2026-03-15",source:"https://www.dlabour.gov.za",changes:["Minimum wage R28.50/hour","Sectoral determinations updated","Domestic worker provisions"],hrImpact:["Payroll update required","Sector-specific compliance","Worker communication"],modules:["薪酬管理"]},
+{id:"ng01",country:"Nigeria",countryCode:"NG",region:"Africa",flag:"🇳🇬",law:"National Minimum Wage Act 2024",category:"Minimum Wage",subCategory:"Minimum Wage",summary:"Implementation of new ₦70,000 minimum wage with state-level rollout.",summaryZh:"实施新的70,000奈拉最低工资，各州层面推出。",status:"active",effectiveDate:"2026-01-01",lastUpdated:"2026-04-10",source:"https://www.nlpc.gov.ng",changes:["₦70,000 minimum wage","Backpay provisions","State-level implementation"],hrImpact:["Payroll adjustment","Budget planning","Employee notification"],modules:["薪酬管理"]},
+{id:"mx01",country:"Mexico",countryCode:"MX",region:"Americas",flag:"🇲🇽",law:"Ley Federal del Trabajo – Outsourcing Reform",category:"Compliance",subCategory:"Employee Benefits",summary:"Second phase of outsourcing ban restricting subcontracting to specialized services.",summaryZh:"禁止外包第二阶段，仅允许专业服务分包。",status:"effective",effectiveDate:"2026-04-01",lastUpdated:"2026-05-20",source:"https://www.gob.mx/stps",changes:["Subcontracting limited to specialized services","Joint liability for clients","Enhanced registration requirements"],hrImpact:["Vendor contract review","Compliance audit","Cost structure analysis"],modules:["员工关系"]},
+{id:"it01",country:"Italy",countryCode:"IT",region:"Europe",flag:"🇮🇹",law:"Smart Work Agreement Expansion",category:"Working Time",subCategory:"Working Time",summary:"Expanded smart working agreements requiring written contracts for all remote workers.",summaryZh:"扩展智能工作协议，要求所有远程工人签订书面合同。",status:"effective",effectiveDate:"2026-03-01",lastUpdated:"2026-04-15",source:"https://www.gazzettaufficiale.it",changes:["Written agreement mandatory","Expense reimbursement rules","Right to disconnect codified"],hrImpact:["Agile work contract creation","Expense policy update","Manager training"],modules:["工时与加班","员工关系"]},
+{id:"es01",country:"Spain",countryCode:"ES",region:"Europe",flag:"🇪🇸",law:"Equal Pay Transparency",category:"Anti-Discrimination",subCategory:"Anti-Discrimination",summary:"Mandatory equal pay transparency for companies with 50+ employees.",summaryZh:"强制同工同酬透明度，要求50人以上公司执行。",status:"upcoming",effectiveDate:"2026-10-01",lastUpdated:"2026-07-01",source:"https://www.boe.es",changes:["Gender pay gap reporting","Remediation plan requirements","Independent audit option"],hrImpact:["Pay equity analysis","Report preparation","Policy development"],modules:["薪酬管理","数据保护"]},
+{id:"nl01",country:"Netherlands",countryCode:"NL",region:"Europe",flag:"🇳🇱",law:"Flexible Work Act Enhancement",category:"Working Time",subCategory:"Working Time",summary:"Employees gain right to adjust working hours, times, and location after 6 months.",summaryZh:"员工在6个月后获得调整工时、时段和地点的权利。",status:"effective",effectiveDate:"2026-02-01",lastUpdated:"2026-03-20",source:"https://wetten.overheid.nl",changes:["Right to adjust after 6 months","Employer must respond within 2 months","Location flexibility right"],hrImpact:["Flexible work policy update","Scheduling system adjustment","Request tracking process"],modules:["工时与加班","员工关系"]},
+{id:"se01",country:"Sweden",countryCode:"SE",region:"Europe",flag:"🇸🇪",law:"Working Hours Act Reform",category:"Working Time",subCategory:"Working Time",summary:"Reformed act allowing more flexible distribution over longer periods.",summaryZh:"改革工时法允许更灵活分配。",status:"active",effectiveDate:"2026-06-01",lastUpdated:"2026-06-10",source:"https://www.riksdagen.se",changes:["Flexible hour distribution","Extended consultation period","Maximum 40-hour week maintained"],hrImpact:["Working time agreement update","Consultation process design","Scheduling flexibility"],modules:["工时与加班"]},
+{id:"th01",country:"Thailand",countryCode:"TH",region:"Asia",flag:"🇹🇭",law:"Labour Protection Act – Domestic Workers",category:"Employee Rights",subCategory:"Employee Benefits",summary:"Extended protections to domestic workers including minimum wage and severance.",summaryZh:"将保护扩展至家政工人，包括最低工资和遣散费。",status:"effective",effectiveDate:"2026-05-01",lastUpdated:"2026-05-15",source:"https://www.mol.go.th",changes:["Domestic workers covered","Minimum wage applies","Severance pay provisions"],hrImpact:["Household employer compliance","Contract updates","Registration requirements"],modules:["薪酬管理","员工关系"]},
+{id:"vn01",country:"Vietnam",countryCode:"VN",region:"Asia",flag:"🇻🇳",law:"Labour Code – Social Insurance Expansion",category:"Social Insurance",subCategory:"Social Insurance",summary:"Expanded social insurance to informal sector workers with voluntary enrollment.",summaryZh:"将社会保险扩展至非正规部门工人。",status:"effective",effectiveDate:"2026-07-01",lastUpdated:"2026-07-10",source:"https://moit.gov.vn",changes:["Informal sector coverage","Voluntary enrollment","Gig worker protections"],hrImpact:["Enrollment process setup","Worker communication","Contribution calculation"],modules:["法定缴费类"]},
+{id:"ph01",country:"Philippines",countryCode:"PH",region:"Asia",flag:"🇵🇭",law:"DO 174 – Anti-Endo Reform",category:"Employee Rights",subCategory:"Employee Benefits",summary:"Strengthened regulations against labor-only contracting.",summaryZh:"加强劳务外包监管。",status:"effective",effectiveDate:"2026-04-01",lastUpdated:"2026-05-01",source:"https://www.dole.gov.ph",changes:["Stricter contractor registration","Worker reclassification provisions","Enhanced penalties"],hrImpact:["Contractor audit","Workforce classification review","Policy compliance update"],modules:["员工关系"]},
+{id:"id01",country:"Indonesia",countryCode:"ID",region:"Asia",flag:"🇮🇩",law:"Omnibus Law – Job Creation Revision",category:"Employee Rights",subCategory:"Employee Benefits",summary:"Revised law balancing worker protections with investment ease.",summaryZh:"修订创造就业法平衡工人保护与投资便利。",status:"active",effectiveDate:"2026-03-01",lastUpdated:"2026-06-01",source:"https://www.jdi.go.id",changes:["Severance formula updated","Flexible working arrangements","Foreign worker permits streamlined"],hrImpact:["Severance calculation update","Working arrangement policies","Permit management"],modules:["离职与遣散","工时与加班"]},
+{id:"my01",country:"Malaysia",countryCode:"MY",region:"Asia",flag:"🇲🇾",law:"Employment Act – Overtime Cap",category:"Working Time",subCategory:"Working Time",summary:"Amendment capping overtime at 104 hours per month.",summaryZh:"修正案将每月加班上限定为104小时。",status:"effective",effectiveDate:"2026-01-15",lastUpdated:"2026-02-01",source:"https://www.dosh.gov.my",changes:["Monthly OT cap at 104 hours","Rest day compensation","Enhanced enforcement"],hrImpact:["Overtime tracking system","Schedule management","Compliance monitoring"],modules:["工时与加班"]},
+{id:"nz01",country:"New Zealand",countryCode:"NZ",region:"Oceania",flag:"🇳🇿",law:"Fair Pay Agreements Act",category:"Minimum Wage",subCategory:"Minimum Wage",summary:"Reinstated sectoral bargaining framework for industries.",summaryZh:"恢复行业集体谈判框架。",status:"upcoming",effectiveDate:"2026-11-01",lastUpdated:"2026-07-01",source:"https://www.legislation.govt.nz",changes:["Sectoral bargaining restored","Industry-wide minimum terms","Mandatory employer participation"],hrImpact:["Industry agreement participation","Budget planning","Compliance framework"],modules:["薪酬管理","员工关系"]},
+{id:"cl01",country:"Chile",countryCode:"CL",region:"Americas",flag:"🇨🇱",law:"Remote Work Law Full Implementation",category:"Working Time",subCategory:"Working Time",summary:"Full implementation with written agreements, 30% expense reimbursement, ergonomic assessments.",summaryZh:"全面实施远程工作法，要求30%费用报销和人体工程学评估。",status:"effective",effectiveDate:"2026-04-01",lastUpdated:"2026-05-10",source:"https://www.bcn.cl",changes:["Written remote work agreement","30% expense reimbursement","Ergonomic assessment required"],hrImpact:["Remote work contracts","Expense tracking system","Ergonomic evaluation"],modules:["工时与加班","法定缴费类"]},
+{id:"co01",country:"Colombia",countryCode:"CO",region:"Americas",flag:"🇨🇴",law:"Digital Platform Worker Protections",category:"Employee Rights",subCategory:"Employee Benefits",summary:"New protections for digital platform workers including minimum earnings and social security.",summaryZh:"对数字平台工人的新保护，包括最低收入和社会保障。",status:"effective",effectiveDate:"2026-06-01",lastUpdated:"2026-06-15",source:"https://www.mintrabajo.gov.co",changes:["Minimum earnings guarantee","Social security for gig workers","Dispute resolution access"],hrImpact:["Platform worker classification","Contribution calculations","Dispute process setup"],modules:["薪酬管理","法定缴费类"]},
+{id:"pl01",country:"Poland",countryCode:"PL",region:"Europe",flag:"🇵🇱",law:"Work-Life Balance Directive",category:"Working Time",subCategory:"Working Time",summary:"EU directive transposition introducing paternity leave, carers leave, flexible arrangements.",summaryZh:"转化欧盟指令引入陪产假、护理假和弹性安排。",status:"effective",effectiveDate:"2026-01-01",lastUpdated:"2026-02-15",source:"https://isap.sejm.gov.pl",changes:["2 weeks paternity leave","5 days carers leave","Flexible work request right"],hrImpact:["Leave policy update","Scheduling system","Manager training"],modules:["休假类","工时与加班"]},
+{id:"ie01",country:"Ireland",countryCode:"IE",region:"Europe",flag:"🇮🇪",law:"Right to Disconnect Code",category:"Working Time",subCategory:"Working Time",summary:"Statutory code requiring employers to limit after-hours communication.",summaryZh:"法定守则要求雇主限制下班后通信。",status:"active",effectiveDate:"2026-04-01",lastUpdated:"2026-04-20",source:"https://www.wrc.ie",changes:["Disconnect policy mandatory","Annual review requirement","Employee notification"],hrImpact:["Policy creation","Manager awareness training","Communication protocols"],modules:["工时与加班"]},
+{id:"at01",country:"Austria",countryCode:"AT",region:"Europe",flag:"🇦🇹",law:"Arbeitszeitgesetz – 12-Hour Day",category:"Working Time",subCategory:"Working Time",summary:"Extended permissible working day to 12 hours with mandatory compensatory rest.",summaryZh:"将允许工作日延长至12小时并规定补偿休息。",status:"effective",effectiveDate:"2026-03-01",lastUpdated:"2026-03-15",source:"https://www.ris.bka.gv.at",changes:["12-hour working day permitted","Mandatory compensatory rest","Enhanced rest requirements"],hrImpact:["Scheduling policy update","Rest period monitoring","Compliance tracking"],modules:["工时与加班"]},
+{id:"be01",country:"Belgium",countryCode:"BE",region:"Europe",flag:"🇧🇪",law:"4-Day Week Pilot",category:"Working Time",subCategory:"Working Time",summary:"Pilot program for 4-day working week with full rights maintained.",summaryZh:"四天工作周试点计划，维持完整权利。",status:"upcoming",effectiveDate:"2026-10-01",lastUpdated:"2026-07-01",source:"https://www.ejustice.just.fgov.be",changes:["4-day week pilot launched","Compressed hours option","Full rights maintained"],hrImpact:["Pilot participation planning","Scheduling adjustment","Rights monitoring"],modules:["工时与加班"]},
+{id:"tr01",country:"Turkey",countryCode:"TR",region:"Asia",flag:"🇹🇷",law:"Minimum Wage & Social Security",category:"Minimum Wage",subCategory:"Minimum Wage",summary:"Significant 30% minimum wage increase with social security adjustments.",summaryZh:"最低工资大幅提高30%并调整社会保障。",status:"effective",effectiveDate:"2026-01-01",lastUpdated:"2026-01-15",source:"https://www.resmigazete.gov.tr",changes:["30% minimum wage increase","Social security base adjustment","Severance pay recalculation"],hrImpact:["Payroll system update","Budget reallocation","Social security reporting"],modules:["薪酬管理","法定缴费类"]},
+{id:"dk01",country:"Denmark",countryCode:"DK",region:"Europe",flag:"🇩🇰",law:"Psychosocial Working Environment Act",category:"Workplace Safety",subCategory:"Workplace Safety",summary:"Enhanced requirements mandating stress risk assessments and anti-bullying policies.",summaryZh:"加强要求强制压力风险评估和反欺凌政策。",status:"active",effectiveDate:"2026-05-01",lastUpdated:"2026-05-15",source:"https://www.retsinformation.dk",changes:["Stress risk assessments mandatory","Anti-bullying policy required","Mental health training"],hrImpact:["Risk assessment implementation","Policy development","Training program"],modules:["工作场所安全"]},
+{id:"fi01",country:"Finland",countryCode:"FI",region:"Europe",flag:"🇫🇮",law:"Annual Leave Enhancement",category:"Working Time",subCategory:"Working Time",summary:"Statutory annual leave increased to 30 days.",summaryZh:"法定年假增加至30天。",status:"active",effectiveDate:"2026-06-01",lastUpdated:"2026-06-10",source:"https://www.finlex.fi",changes:["30 days statutory leave","Improved carry-over rules","Holiday bonus requirements"],hrImpact:["Leave management update","Bonus calculation","Policy revision"],modules:["休假类"]},
+{id:"pt01",country:"Portugal",countryCode:"PT",region:"Europe",flag:"🇵🇹",law:"Right to Disconnect",category:"Working Time",subCategory:"Working Time",summary:"Statutory right limiting employer communication outside working hours.",summaryZh:"法定断开连接权限制工作时间外通信。",status:"active",effectiveDate:"2026-04-01",lastUpdated:"2026-04-15",source:"https://www.pgdlisboa.pt",changes:["Communication limits after hours","Sanction framework","Annual reporting"],hrImpact:["Policy creation","IT configuration","Manager training"],modules:["工时与加班"]},
+{id:"ch01",country:"Switzerland",countryCode:"CH",region:"Europe",flag:"🇨🇭",law:"Overtime Reform",category:"Working Time",subCategory:"Working Time",summary:"Reformed regulations increasing flexibility in working hour arrangements.",summaryZh:"改革法规增加工时安排灵活性。",status:"active",effectiveDate:"2026-03-01",lastUpdated:"2026-03-20",source:"https://www.bundeskanzlei.ch",changes:["Flexible hour arrangements","Enhanced compensation options","Employee choice provisions"],hrImpact:["Overtime policy update","Compensation flexibility","Agreement management"],modules:["工时与加班","薪酬管理"]},
+{id:"il01",country:"Israel",countryCode:"IL",region:"Asia",flag:"🇮🇱",law:"Gig Economy Working Hours",category:"Working Time",subCategory:"Working Time",summary:"Extension of working hours protections to gig economy workers.",summaryZh:"将工时保护扩展至零工经济工人。",status:"active",effectiveDate:"2026-07-01",lastUpdated:"2026-07-10",source:"https://www.nevo.co.il",changes:["Gig worker protections","Minimum rest periods","Maximum weekly hours"],hrImpact:["Worker classification review","Scheduling compliance","Payroll updates"],modules:["工时与加班","员工关系"]},
+{id:"za02",country:"South Africa",countryCode:"ZA",region:"Africa",flag:"🇿🇦",law:"POPIA Data Protection",category:"Data Privacy",subCategory:"Data Privacy",summary:"Amendments strengthening employee consent and breach notification.",summaryZh:"修订加强员工同意和泄露通知。",status:"active",effectiveDate:"2026-06-01",lastUpdated:"2026-06-15",source:"https://www.justice.gov.za",changes:["Enhanced consent requirements","Breach notification obligations","Data minimization principles"],hrImpact:["Privacy policy update","Breach response plan","Consent management"],modules:["数据保护","员工关系"]},
+{id:"ng02",country:"Nigeria",countryCode:"NG",region:"Africa",flag:"🇳🇬",law:"Pension Reform – Contributory Enhancement",category:"Social Insurance",subCategory:"Social Insurance",summary:"Enhanced contributory pension increasing employer contribution to 12%.",summaryZh:"加强缴费型养老金，雇主缴费提高至12%。",status:"active",effectiveDate:"2026-04-01",lastUpdated:"2026-05-01",source:"https://www.pencom.gov.ng",changes:["Employer contribution to 12%","Employee contribution to 8%","Enhanced portability"],hrImpact:["Payroll deduction update","Budget impact","Employee communication"],modules:["法定缴费类"]},
+{id:"eg01",country:"Egypt",countryCode:"EG",region:"Africa",flag:"🇪🇬",law:"Labour Law – Minimum Wage & Social Insurance",category:"Minimum Wage",subCategory:"Minimum Wage",summary:"Updated minimum wage and expanded social insurance coverage.",summaryZh:"更新最低工资，扩大社会保险覆盖。",status:"upcoming",effectiveDate:"2026-09-01",lastUpdated:"2026-07-01",source:"https://www.mans.gov.eg",changes:["New minimum wage level","Social insurance expansion","Contribution rate adjustment"],hrImpact:["Payroll update","Budget planning","Registration requirements"],modules:["薪酬管理","法定缴费类"]},
+{id:"ke01",country:"Kenya",countryCode:"KE",region:"Africa",flag:"🇰🇪",law:"Digital Nomad Visa Framework",category:"Employee Rights",subCategory:"Employee Benefits",summary:"New framework for digital nomad visas for foreign remote workers.",summaryZh:"数字游牧签证新框架。",status:"upcoming",effectiveDate:"2026-10-01",lastUpdated:"2026-07-01",source:"https://www.employment.go.ke",changes:["Digital nomad visa category","Tax obligation framework","Work permit streamlined"],hrImpact:["Remote worker policy","Tax withholding setup","Permit management"],modules:["员工关系","薪酬管理"]}
+];
+const aiMonitorData=[
+{country:"Japan",flag:"🇯🇵",title:"Work Style Reform 2.0",category:"Working Time",date:"2026-08-05",severity:"high",summary:"Major overhaul of overtime regulations with 960-hour annual cap"},
+{country:"South Korea",flag:"🇰🇷",title:"Work-Life Balance Enhancement",category:"Working Time",date:"2026-07-20",severity:"medium",summary:"Annual leave extended to 25 days with parental leave transfer"},
+{country:"Singapore",flag:"🇸🇬",title:"Progressive Wage Model",category:"Minimum Wage",date:"2026-07-15",severity:"medium",summary:"PWM extended to retail, food services and waste management"},
+{country:"Australia",flag:"🇦🇺",title:"Fair Work Modern Awards",category:"Working Time",date:"2026-07-15",severity:"medium",summary:"Annual review resulting in 3.5% minimum wage increase"},
+{country:"United Kingdom",flag:"🇬🇧",title:"Employment Rights Bill",category:"Employee Rights",date:"2026-07-10",severity:"high",summary:"Sweeping reform with day-one unfair dismissal protection"},
+{country:"United States",flag:"🇺🇸",title:"FLSA Overtime Update",category:"Working Time",date:"2026-07-15",severity:"high",summary:"Salary threshold for exempt employees raised to $62,400"},
+{country:"China",flag:"🇨🇳",title:"Social Insurance Reform",category:"Social Insurance",date:"2026-06-01",severity:"medium",summary:"Pension contribution reduced to 16% with gig worker coverage"},
+{country:"Brazil",flag:"🇧🇷",title:"Remote Work CLT Reform",category:"Working Time",date:"2026-05-20",severity:"medium",summary:"Comprehensive remote work framework with expense reimbursement"}
+];
+
+const countryNameMap={"Australia":"澳大利亚","Germany":"德国","France":"法国","United Kingdom":"英国","United States":"美国","Canada":"加拿大","Brazil":"巴西","Japan":"日本","South Korea":"韩国","Singapore":"新加坡","India":"印度","China":"中国","UAE":"阿联酋","Saudi Arabia":"沙特阿拉伯","South Africa":"南非","Nigeria":"尼日利亚","Mexico":"墨西哥","Italy":"意大利","Spain":"西班牙","Netherlands":"荷兰","Sweden":"瑞典","Thailand":"泰国","Vietnam":"越南","Philippines":"菲律宾","Indonesia":"印尼","Malaysia":"马来西亚","New Zealand":"新西兰","Chile":"智利","Colombia":"哥伦比亚","Poland":"波兰","Ireland":"爱尔兰","Austria":"奥地利","Belgium":"比利时","Turkey":"土耳其","Denmark":"丹麦","Finland":"芬兰","Portugal":"葡萄牙","Switzerland":"瑞士","Israel":"以色列","Egypt":"埃及","Kenya":"肯尼亚"};
+
+const countryDetailPages={"Australia":"https://www.fairwork.gov.au","Germany":"https://www.arbeitsschutz.de","France":"https://www.service-public.fr","United Kingdom":"https://www.gov.uk/employment-rights","United States":"https://www.dol.gov/agencies/whd","Canada":"https://www.canada.ca/en/employment-social-development.html","Brazil":"https://www.gov.br/trabalho","Japan":"https://www.mhlw.go.jp/english","South Korea":"https://www.koreanlaw.go.kr/eng","Singapore":"https://www.mom.gov.sg","India":"https://labour.gov.in","China":"https://www.mohrss.gov.cn","UAE":"https://www.mohre.gov.ae","Saudi Arabia":"https://www.hrsd.gov.sa","South Africa":"https://www.dlabour.gov.za","Nigeria":"https://www.nlpc.gov.ng"};
+
+const i18n={
+  zh:{title:"全球劳动法规智能监控",heroTitle:"全球劳动法规智能监控",notifications:"通知中心",close:"关闭",all:"全部",sortDate:"按更新日期",sortCountry:"按国家",libTitle:"就业法规库",libSub:"所选国家/地区的全部就业法规",searchPlaceholder:"🔍 搜索法规、国家或HR主题...",globeInfo:"点击国家放大 · 滚轮缩放 · 返回世界视图",backToWorld:"返回世界视图",resetFilters:"重置筛选",countryRegion:"国家/地区",regulationType:"法规类型",updated:"排序方式",viewDetails:"查看详情 →",viewAll:"查看全部更新 →",regulationTimeline:"── 法规时间线 ──",regulationLibrary:"── 法规库 ──",regulatoryInsights:"法规洞察",upcomingDates:"即将生效日期",aiImpactSummary:"AI影响摘要"},
+  en:{title:"Global Labor Law Intelligence",heroTitle:"Global Labor Law Intelligence",notifications:"Notifications",close:"Close",all:"All",sortDate:"By Update Date",sortCountry:"By Country",libTitle:"Regulation Library",libSub:"All employment regulations for selected countries",searchPlaceholder:"🔍 Search regulations, countries or HR topics...",globeInfo:"Click country to zoom · Scroll to zoom · Return to world view",backToWorld:"Return to World View",resetFilters:"Reset filters",countryRegion:"Country / Region",regulationType:"Regulation Type",updated:"Sort",viewDetails:"View Details →",viewAll:"View All Updates →",regulationTimeline:"── REGULATORY TIMELINE ──",regulationLibrary:"── REGULATION LIBRARY ──",regulatoryInsights:"REGULATORY INSIGHTS",upcomingDates:"UPCOMING EFFECTIVE DATES",aiImpactSummary:"AI IMPACT SUMMARY"},
+  es:{title:"Inteligencia Laboral Global",heroTitle:"Inteligencia Laboral Global",notifications:"Notificaciones",close:"Cerrar",all:"Todos",sortDate:"Por Fecha",sortCountry:"Por País",libTitle:"Biblioteca de Regulaciones",libSub:"Todas las regulaciones laborales",searchPlaceholder:"🔍 Buscar regulaciones, países o temas de RRHH...",globeInfo:"Haga clic para ampliar · Rueda del ratón para zoom",backToWorld:"Vista Mundial",resetFilters:"Restablecer filtros",countryRegion:"País / Región",regulationType:"Tipo de Regulación",updated:"Ordenar",viewDetails:"Ver Detalles →",viewAll:"Ver Todas las Actualizaciones →",regulationTimeline:"── LÍNEA DE TIEMPO ──",regulationLibrary:"── BIBLIOTECA ──",regulatoryInsights:"PERSPECTIVAS",upcomingDates:"FECHAS PRÓXIMAS",aiImpactSummary:"RESUMEN DE IMPACTO IA"}
+};
+
+let currentLang='zh',currentRegion='',currentSort='date',mapInstance=null,geoLayer=null,geoData=null,currentZoom=2,selectedCountry=null,filteredData=[...laborLawData];
+
+function switchLang(lang){currentLang=lang;applyFilters();updateLangButton();renderNotifPanel();updateI18nText();populateRegionTabs()}
+function updateLangButton(){const b=document.getElementById('langBtn');b.textContent=currentLang==='zh'?'🌐 中文':currentLang==='en'?'🌐 English':'🌐 Español'}
+function updateI18nText(){const t=i18n[currentLang];document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(t[k])el.textContent=t[k]});document.querySelectorAll('[data-i18n-ph]').forEach(el=>{const k=el.getAttribute('data-i18n-ph');if(t[k])el.placeholder=t[k]})}
+function toggleDD(id){document.getElementById(id).classList.toggle('open')}
+function toggleTheme(){const h=document.documentElement;const d=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',d?'light':'dark');document.getElementById('themeBtn').textContent=d?'☀️':'🌙'}
+function toggleNotifPanel(){document.getElementById('notifPanel').classList.toggle('open')}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+function populateCountryFilter(){const sel=document.getElementById('filterCountry');const countries=[...new Set(laborLawData.map(d=>d.country))].sort();sel.innerHTML='<option value="">'+i18n[currentLang].all+'</option>';countries.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o)})}
+
+const regions=[{key:'',label:{zh:'全球',en:'Global',es:'Global'}},{key:'Asia',label:{zh:'亚洲',en:'Asia',es:'Asia'}},{key:'Europe',label:{zh:'欧洲',en:'Europe',es:'Europa'}},{key:'Americas',label:{zh:'美洲',en:'Americas',es:'Américas'}},{key:'Africa',label:{zh:'非洲',en:'Africa',es:'África'}},{key:'Oceania',label:{zh:'大洋洲',en:'Oceania',es:'Oceanía'}}];
+let currentTabRegion='';
+
+function populateRegionTabs(){const el=document.getElementById('heroChips');el.innerHTML='';regions.forEach(r=>{const btn=document.createElement('button');btn.className='tab-btn'+(r.key===currentTabRegion?' active':'');btn.textContent=r.label[currentLang];btn.onclick=()=>{currentTabRegion=r.key;document.getElementById('filterRegion').value=r.key;applyFilters();populateRegionTabs()};el.appendChild(btn)})}
+
+function onBizChange(){applyFilters()}
+function onCountrySelectChange(){applyFilters()}
+
+function applyFilters(){
+  const region=document.getElementById('filterRegion').value||currentTabRegion;
+  const country=document.getElementById('filterCountry').value;
+  const biz=document.getElementById('filterBiz').value;
+  const sort=document.getElementById('sortBy').value;
+  const search=document.getElementById('searchInput').value.toLowerCase().trim();
+  currentRegion=region;currentSort=sort;currentTabRegion=region;
+  let d=[...laborLawData];
+  if(region)d=d.filter(r=>r.region===region);
+  if(country)d=d.filter(r=>r.country===country);
+  if(biz)d=d.filter(r=>r.category===biz||r.subCategory===biz);
+  if(search)d=d.filter(r=>(r.country+' '+r.law+' '+r.category+' '+r.summary+' '+r.summaryZh+' '+r.flag+' '+r.modules.join(' ')).toLowerCase().includes(search));
+  if(sort==='date')d.sort((a,b)=>new Date(b.lastUpdated)-new Date(a.lastUpdated));
+  else d.sort((a,b)=>a.country.localeCompare(b.country));
+  filteredData=d;
+  renderTimeline();renderLawCards();updateKPIs();renderUpcoming();renderAISummary();renderTicker();
+  document.getElementById('libCount').textContent='Showing '+d.length+' regulations';
+}
+
+function resetFilters(){document.getElementById('filterRegion').value='';document.getElementById('filterCountry').value='';document.getElementById('filterBiz').value='';document.getElementById('sortBy').value='date';document.getElementById('searchInput').value='';currentTabRegion='';applyFilters();populateRegionTabs()}
+
+function renderTimeline(){
+  const el=document.getElementById('timeline');
+  const sorted=[...filteredData].sort((a,b)=>new Date(b.lastUpdated)-new Date(a.lastUpdated));
+  const groups={};
+  sorted.forEach(item=>{const d=new Date(item.lastUpdated);const y=d.getFullYear();if(!groups[y])groups[y]=[];groups[y].push(item)});
+  let html='';
+  Object.keys(groups).sort((a,b)=>b-a).forEach(year=>{
+    html+='<div class="tl-group"><div class="tl-year">'+year+'</div>';
+    groups[year].forEach(item=>{
+      const d=new Date(item.lastUpdated);const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+      const dateStr=months[d.getMonth()]+' '+String(d.getDate()).padStart(2,'0');
+      html+='<div class="tl-entry" onclick="openDetail(\''+item.id+'\')">';
+      html+='<div class="tl-left"><div class="tl-dot"></div><div class="tl-date">'+dateStr+'</div></div>';
+      html+='<div class="tl-right"><div class="tl-meta"><span class="tl-flag">'+item.flag+'</span><span class="tl-country">'+item.country+'</span><span class="tl-cat">'+item.category+'</span></div>';
+      html+='<div class="tl-law">'+item.law+'</div>';
+      html+='<div class="tl-summary">'+(currentLang==='zh'?item.summaryZh:item.summary)+'</div>';
+      html+='<div class="tl-link">'+i18n[currentLang].viewDetails+'</div></div></div>';
+    });
+    html+='</div>';
+  });
+  if(!html)html='<div style="padding:20px;text-align:center;color:var(--text3)">No regulations match your filters.</div>';
+  el.innerHTML=html;
+}
+
+function renderLawCards(){
+  const el=document.getElementById('lawCards');let html='';
+  filteredData.forEach(item=>{
+    const sc=item.status==='effective'?'effective':item.status==='upcoming'?'upcoming':item.status==='action-required'?'action-required':'active';
+    const sl=item.status==='effective'?'Effective':item.status==='upcoming'?'Upcoming':item.status==='action-required'?'Action Required':'Active';
+    html+='<div class="law-card" onclick="openDetail(\''+item.id+'\')">';
+    html+='<div class="lc-top"><span class="lc-flag">'+item.flag+'</span><span class="lc-country">'+item.country+'</span></div>';
+    html+='<div class="lc-title">'+item.law+'</div>';
+    html+='<div class="lc-cat">'+item.category+'</div>';
+    html+='<div class="lc-date">· '+item.lastUpdated+'</div>';
+    html+='<div class="lc-summary">'+(currentLang==='zh'?item.summaryZh:item.summary)+'</div>';
+    html+='<div class="lc-footer"><span class="lc-status '+sc+'">'+sl+'</span><span class="lc-link">'+i18n[currentLang].viewDetails+'</span></div>';
+    html+='</div>';
+  });
+  if(!html)html='<div class="lib-empty">No regulations match your filters.</div>';
+  el.innerHTML=html;
+}
+
+function updateKPIs(){
+  document.getElementById('kTotal').textContent=laborLawData.length;
+  document.getElementById('kCountries').textContent=[...new Set(laborLawData.map(d=>d.country))].length;
+  const thirty=new Date();thirty.setDate(thirty.getDate()-30);
+  document.getElementById('kUpdated30').textContent=laborLawData.filter(d=>new Date(d.lastUpdated)>=thirty).length;
+  document.getElementById('kAction').textContent=laborLawData.filter(d=>d.status==='action-required'||d.status==='upcoming').length;
+}
+
+function renderUpcoming(){
+  const el=document.getElementById('upcomingList');
+  const upcoming=laborLawData.filter(d=>d.effectiveDate).sort((a,b)=>new Date(a.effectiveDate)-new Date(b.effectiveDate)).slice(0,6);
+  let html='';
+  upcoming.forEach(item=>{
+    html+='<div class="upcoming-item" onclick="openDetail(\''+item.id+'\')">';
+    html+='<div class="upcoming-date">'+item.effectiveDate+' · '+item.flag+' '+item.country+'</div>';
+    html+='<div class="upcoming-title">'+item.law.substring(0,50)+(item.law.length>50?'...':'')+'</div>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+function renderAISummary(){
+  const el=document.getElementById('aiSummary');
+  const thirty=new Date();thirty.setDate(thirty.getDate()-30);
+  const recent=laborLawData.filter(d=>new Date(d.lastUpdated)>=thirty);
+  const byCat={};recent.forEach(d=>{byCat[d.category]=(byCat[d.category]||0)+1});
+  const actionR=recent.filter(d=>d.status==='upcoming'||d.status==='action-required').length;
+  let html='过去 30 天共有 <strong>'+recent.length+'</strong> 项法规更新:<br>';
+  Object.entries(byCat).forEach(([cat,count])=>{html+='• '+count+' 项影响 '+cat+'<br>'});
+  if(actionR)html+='• '+actionR+' 项需要 HR Policy Update<br>';
+  html+='• '+(recent.length-actionR)+' 项仅为信息更新';
+  el.innerHTML=html;
+}
+
+function renderTicker(){
+  const el=document.getElementById('tickerTrack');
+  const sorted=[...laborLawData].sort((a,b)=>new Date(b.lastUpdated)-new Date(a.lastUpdated)).slice(0,12);
+  let html='';const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const build=()=>{sorted.forEach(item=>{const d=new Date(item.lastUpdated);const ds=months[d.getMonth()]+' '+String(d.getDate()).padStart(2,'0');const isNew=(Date.now()-new Date(item.lastUpdated).getTime())<7*86400000;html+='<div class="tc-item" onclick="openDetail(\''+item.id+'\')"><span class="flag">'+item.flag+'</span><span class="name">'+item.country+'</span><span class="sep">·</span><span class="cat">'+item.category+'</span><span class="title">'+item.law.substring(0,30)+(item.law.length>30?'...':'')+'</span><span class="date">'+ds+'</span>'+(isNew?'<span class="new-tag">NEW</span>':'')+'</div>'})};
+  build();build();
+  html+='<div class="ticker-viewall" onclick="document.getElementById(\'libraryLabel\').scrollIntoView({behavior:\'smooth\'})">View All Updates →</div>';
+  el.innerHTML=html;el.classList.add('auto');
+}
+
+function renderNotifPanel(){
+  const el=document.getElementById('notifBody');
+  let html='<div class="notif-group-label">RECENT UPDATES</div>';
+  aiMonitorData.forEach(n=>{
+    html+='<div class="notif-item"><span class="ni-flag">'+n.flag+'</span><div class="ni-body">';
+    html+='<div class="ni-title">'+n.title+'</div><div class="ni-sub">'+n.country+' · '+n.category+'</div>';
+    html+='<div class="ni-date">'+n.date+'</div></div>';
+    if(n.severity==='high')html+='<span class="ni-badge">!</span>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+  document.getElementById('notifBadge').textContent=aiMonitorData.filter(n=>n.severity==='high').length||aiMonitorData.length;
+}
+
+function openDetail(id){
+  const item=laborLawData.find(d=>d.id===id);if(!item)return;
+  const tl=currentLang==='zh';
+  let html='<h2 style="font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">'+item.flag+' '+item.country+' — '+item.law+'</h2>';
+  html+='<div class="dp-grid"><div class="dp-section"><h4>📋 Basic Info</h4>';
+  html+='<div class="dp-row"><div class="dp-label">Category</div><div class="dp-val"><span class="dp-tag mod">'+item.category+'</span></div></div>';
+  html+='<div class="dp-row"><div class="dp-label">Status</div><div class="dp-val" style="text-transform:capitalize">'+item.status+'</div></div>';
+  html+='<div class="dp-row"><div class="dp-label">Effective Date</div><div class="dp-val">'+item.effectiveDate+'</div></div>';
+  html+='<div class="dp-row"><div class="dp-label">Last Updated</div><div class="dp-val">'+item.lastUpdated+'</div></div>';
+  html+='<div class="dp-row"><div class="dp-label">Country</div><div class="dp-val">'+item.country+(countryNameMap[item.country]?' ('+countryNameMap[item.country]+')':'')+'</div></div>';
+  html+='</div><div class="dp-section"><h4>📝 Summary</h4>';
+  html+='<div class="dp-row"><div class="dp-label">'+(tl?'English原文':'English')+'</div><div class="dp-val">'+item.summary+'</div></div>';
+  html+='<div class="dp-row"><div class="dp-label">'+(tl?'中文翻译':'Chinese')+'</div><div class="dp-val">'+item.summaryZh+'</div></div>';
+  html+='</div></div>';
+  html+='<div class="dp-section" style="margin-top:16px"><h4>🔄 Key Changes</h4>';
+  item.changes.forEach(c=>{html+='<div style="margin-bottom:4px;font-size:12px;color:var(--text)">• '+c+'</div>'});
+  html+='</div><div class="dp-section" style="margin-top:16px"><h4>💼 HR Impact Assessment</h4>';
+  item.hrImpact.forEach(h=>{html+='<div style="margin-bottom:4px;font-size:12px;color:var(--text)">• '+h+'</div>'});
+  html+='</div><div class="dp-section" style="margin-top:16px"><h4>🔗 Official Source</h4><div class="dp-val"><a href="'+item.source+'" target="_blank">'+item.source+'</a></div></div>';
+  if(countryDetailPages[item.country])html+='<button class="btn-fullview" onclick="openCountryPage(\''+item.country+'\')">📖 '+i18n[currentLang].viewDetails+'</button>';
+  document.getElementById('detailContent').innerHTML=html;
+  document.getElementById('detailOverlay').classList.add('open');
+  document.getElementById('detailPanel').classList.add('open');
+}
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('open');document.getElementById('detailPanel').classList.remove('open')}
+function closeDrawer(){document.getElementById('drawerOverlay').classList.remove('open');document.getElementById('drawer').classList.remove('open')}
+function openCountryPage(country){const url=countryDetailPages[country];if(!url){showToast('No detail page available');return}document.getElementById('countryModalTitle').innerHTML='📖 '+country+' ('+(countryNameMap[country]||country)+')';document.getElementById('countryModalIframe').src=url;document.getElementById('countryModal').classList.add('open')}
+function closeCountryPage(){document.getElementById('countryModal').classList.remove('open');document.getElementById('countryModalIframe').src=''}
+
+function initMap(){
+  try{
+    mapInstance=L.map('leafletMap',{zoomControl:true,scrollWheelZoom:true}).setView([20,0],2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'',maxZoom:18}).addTo(mapInstance);
+    fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
+      .then(r=>r.json()).then(data=>{
+        geoData=data;
+        const cc={};laborLawData.forEach(d=>{cc[d.country]=(cc[d.country]||0)+1});
+        geoLayer=L.geoJSON(data,{style:f=>{const n=f.properties.ADMIN;const c=cc[n]||0;return{fillColor:c>3?'#2563eb':c>1?'#3b82f6':c>0?'#60a5fa':'#e2e8f0',fillOpacity:c>0?0.7:0.1,weight:1,color:'#fff',opacity:0.5}},onEachFeature:(f,l)=>{
+          const n=f.properties.ADMIN;const c=cc[n]||0;
+          if(c>0){l.bindTooltip(n+' ('+c+')',{className:'map-tip',direction:'top',offset:[0,-5]});l.on('click',()=>zoomToCountry(n,c));l.on('mouseover',function(){this.setStyle({fillOpacity:0.9,weight:2})});l.on('mouseout',function(){geoLayer.resetStyle(this)})}
+        }}).addTo(mapInstance);
+        renderLegend(cc);
+      }).catch(()=>{});
+  }catch(e){console.error('Map init error',e)}
+}
+
+function zoomToCountry(name,count){
+  selectedCountry=name;currentZoom=6;
+  mapInstance.eachLayer(layer=>{if(layer.feature&&layer.feature.properties.ADMIN===name){mapInstance.fitBounds(layer.getBounds(),{maxZoom:6})}});
+  document.getElementById('mapReturnBtn').classList.add('show');
+  document.getElementById('mapChip').classList.add('show');
+  const cd=laborLawData.filter(d=>d.country===name);
+  document.getElementById('mcName').innerHTML=(cd[0]?cd[0].flag+' ':'')+name+(countryNameMap[name]?' ('+countryNameMap[name]+')':'');
+  document.getElementById('mcCount').textContent=count+' regulation'+(count>1?'s':'');
+  document.getElementById('filterCountry').value=name;
+  applyFilters();
+}
+
+function returnToWorldView(){
+  selectedCountry=null;currentZoom=2;mapInstance.setView([20,0],2);
+  document.getElementById('mapReturnBtn').classList.remove('show');
+  document.getElementById('mapChip').classList.remove('show');
+  document.getElementById('filterCountry').value='';applyFilters();
+}
+
+function renderLegend(counts){
+  const el=document.getElementById('globeLegend');
+  el.innerHTML='<div class="gleg"><span class="gdot" style="background:#2563eb"></span>3+ regulations</div><div class="gleg"><span class="gdot" style="background:#3b82f6"></span>2 regulations</div><div class="gleg"><span class="gdot" style="background:#60a5fa"></span>1 regulation</div>';
+}
+
+function applyURLParams(){
+  const p=new URLSearchParams(window.location.search);
+  const lang=p.get('lang');if(lang&&i18n[lang])currentLang=lang;
+  const region=p.get('region');if(region)document.getElementById('filterRegion').value=region;
+  const country=p.get('country');if(country)document.getElementById('filterCountry').value=country;
+  const search=p.get('q');if(search)document.getElementById('searchInput').value=search;
+}
+
+document.addEventListener('click',e=>{if(!e.target.closest('.dd-wrap'))document.querySelectorAll('.dd-menu').forEach(m=>m.classList.remove('open'))});
+window.addEventListener('DOMContentLoaded',()=>{applyURLParams();populateCountryFilter();populateRegionTabs();updateLangButton();applyFilters();renderNotifPanel();initMap();updateI18nText()});
+</script>
 </body>
 </html>
