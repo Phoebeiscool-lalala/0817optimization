@@ -166,6 +166,7 @@ function renderNotifPanel(){
 
 function openDetail(id){
   const item=laborLawData.find(d=>d.id===id);if(!item)return;
+  currentViewingLaw=item;
   const tl=currentLang==='zh';
   let html='<h2 style="font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">'+item.flag+' '+item.country+' — '+item.law+'</h2>';
   html+='<div class="dp-grid"><div class="dp-section"><h4>📋 Basic Info</h4>';
@@ -188,7 +189,7 @@ function openDetail(id){
   document.getElementById('detailOverlay').classList.add('open');
   document.getElementById('detailPanel').classList.add('open');
 }
-function closeDetail(){document.getElementById('detailOverlay').classList.remove('open');document.getElementById('detailPanel').classList.remove('open')}
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('open');document.getElementById('detailPanel').classList.remove('open');currentViewingLaw=null}
 function closeDrawer(){document.getElementById('drawerOverlay').classList.remove('open');document.getElementById('drawer').classList.remove('open')}
 function openCountryPage(country){const url=countryDetailPages[country];if(!url){showToast('No detail page available');return}document.getElementById('countryModalTitle').innerHTML='📖 '+country+' ('+(countryNameMap[country]||country)+')';document.getElementById('countryModalIframe').src=url;document.getElementById('countryModal').classList.add('open')}
 function closeCountryPage(){document.getElementById('countryModal').classList.remove('open');document.getElementById('countryModalIframe').src=''}
@@ -244,6 +245,133 @@ function applyURLParams(){
 }
 
 document.addEventListener('click',e=>{if(!e.target.closest('.dd-wrap'))document.querySelectorAll('.dd-menu').forEach(m=>m.classList.remove('open'))});
+
+// ============ AI Panel Logic ============
+let aiPanelOpen = false;
+let currentViewingLaw = null; // Track which law detail is open
+
+function toggleAIPanel() {
+  aiPanelOpen = !aiPanelOpen;
+  const panel = document.getElementById('aiPanel');
+  const fab = document.getElementById('aiFab');
+  if (aiPanelOpen) {
+    if (!hasApiKey()) { openKeyModal(); return; }
+    panel.classList.add('open');
+    fab.classList.add('hidden');
+  } else {
+    panel.classList.remove('open');
+    fab.classList.remove('hidden');
+  }
+}
+
+function switchAITab(tab) {
+  document.querySelectorAll('.ai-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.ai-tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('aiTab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+}
+
+function openKeyModal() {
+  document.getElementById('aiKeyModal').classList.add('open');
+  document.getElementById('aiKeyInput').value = getApiKey();
+}
+
+function closeKeyModal() {
+  document.getElementById('aiKeyModal').classList.remove('open');
+}
+
+function saveApiKey() {
+  const key = document.getElementById('aiKeyInput').value.trim();
+  if (!key) { showToast('请输入 API Key'); return; }
+  setApiKey(key);
+  closeKeyModal();
+  showToast('API Key 已保存');
+  // If panel was trying to open, open it now
+  if (!aiPanelOpen) toggleAIPanel();
+}
+
+// Chat
+async function sendAIChat() {
+  const input = document.getElementById('aiChatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  if (!hasApiKey()) { openKeyModal(); return; }
+
+  const messagesEl = document.getElementById('aiChatMessages');
+  // Add user message
+  messagesEl.innerHTML += `<div class="ai-msg ai-msg-user">${escapeHtml(msg)}</div>`;
+  input.value = '';
+  // Add loading
+  messagesEl.innerHTML += `<div class="ai-msg ai-msg-loading" id="aiLoading">思考中...</div>`;
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  try {
+    const context = currentViewingLaw ? currentViewingLaw : null;
+    const reply = await chatWithAI(msg, context);
+    document.getElementById('aiLoading')?.remove();
+    messagesEl.innerHTML += `<div class="ai-msg ai-msg-bot">${escapeHtml(reply)}</div>`;
+  } catch (e) {
+    document.getElementById('aiLoading')?.remove();
+    messagesEl.innerHTML += `<div class="ai-msg ai-msg-bot" style="color:var(--red)">❌ ${escapeHtml(e.message)}</div>`;
+  }
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+// Translate
+async function doTranslate() {
+  const text = document.getElementById('aiTranslateInput').value.trim();
+  if (!text) { showToast('请输入要翻译的文本'); return; }
+  if (!hasApiKey()) { openKeyModal(); return; }
+
+  const lang = document.getElementById('aiTranslateLang').value;
+  const resultEl = document.getElementById('aiTranslateResult');
+  resultEl.innerHTML = '<span style="color:var(--text3)">翻译中...</span>';
+
+  try {
+    const result = await translateText(text, lang);
+    resultEl.textContent = result;
+  } catch (e) {
+    resultEl.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`;
+  }
+}
+
+// Analyze
+async function doAnalyzeCurrent() {
+  if (!hasApiKey()) { openKeyModal(); return; }
+  if (!currentViewingLaw) {
+    showToast('请先点击一条法规查看详情');
+    return;
+  }
+
+  const resultEl = document.getElementById('aiAnalyzeResult');
+  resultEl.innerHTML = '<span style="color:var(--text3)">AI 正在深度分析...</span>';
+
+  try {
+    const result = await analyzeLaw(currentViewingLaw);
+    resultEl.textContent = result;
+  } catch (e) {
+    resultEl.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`;
+  }
+}
+
+async function doRegionalInsight() {
+  if (!hasApiKey()) { openKeyModal(); return; }
+  const region = currentRegion || 'Asia';
+  const resultEl = document.getElementById('aiAnalyzeResult');
+  resultEl.innerHTML = `<span style="color:var(--text3)">正在分析 ${region} 地区趋势...</span>`;
+
+  try {
+    const result = await generateRegionalInsight(region);
+    resultEl.textContent = result;
+  } catch (e) {
+    resultEl.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message)}</span>`;
+  }
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   await loadData();
   applyURLParams();
