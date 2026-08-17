@@ -1,0 +1,23 @@
+{
+  "name": "global-labor-law-intelligence",
+  "version": "3.0.0",
+  "description": "Global Labor Law Intelligence Dashboard - AI-powered regulatory monitoring system",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve .",
+    "start": "npx serve .",
+    "build": "echo 'Static site - no build step required'",
+    "deploy:cf": "npx wrangler pages deploy . --project-name=0817optimization"
+  },
+  "keywords": [
+    "labor-law",
+    "hr-compliance",
+    "global-regulations",
+    "regulatory-intelligence"
+  ],
+  "author": "Phoebeiscool-lalala",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.0.0"
+  }
+}
